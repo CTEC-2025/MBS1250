@@ -3,6 +3,7 @@
 MBS1250::MBS1250(uint8_t pin, float vRef) {
 	_pin = pin;
 	_vRef = vRef;
+	_clampEnabled = true;
 
 	#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
 		if (_pin < A0 || _pin > A5) {
@@ -11,8 +12,19 @@ MBS1250::MBS1250(uint8_t pin, float vRef) {
 	#endif
 }
 
+void MBS1250::enableClamping(bool on) {
+	_clampEnabled = on;
+}
+
 float MBS1250::readVoltage() {
-	return analogRead(_pin) * (5.0 /1023);
+	float voltage = analogRead(_pin) * (_vRef / 1023.0);
+	
+	if (_clampEnabled) {
+		if (voltage < 0.5) voltage = 0.5;
+		if (voltage > 4.5) voltage = 4.5;
+	}
+	
+	return voltage;
 }
 
 float MBS1250::readPressure() {
