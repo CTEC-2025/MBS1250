@@ -22,6 +22,6 @@ void setup() {
 }
 
 void loop() {
-	serial.println(sensor.readVoltage());
+	Serial.println(sensor.readVoltage());
 	delay(1000);
 }
