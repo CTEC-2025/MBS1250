@@ -5,12 +5,13 @@
 
 class MBS1250 {
 public:
-	MBS1250(uint9_t pin);
+	MBS1250(uint8_t, float vRef =5.0);
 	float readVoltage();
-	float readPressure(); // New: Pressure In Bar
+	float readPressure();
 	
 private:
 	uint8_t _pin;
+	float _vRef;
 };
 
 #endif

@@ -1,7 +1,8 @@
 #include "MBS1250.h"
 
-MBS1250::MBS1250(uint8_t pin) {
+MBS1250::MBS1250(uint8_t pin, float vRef) {
 	_pin = pin;
+	_vRef = vRef;
 }
 
 #if defined(ARDUINO_AVR_UNO || defined(ARDUINO_AVR_NANO)
