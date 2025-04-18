@@ -1,0 +1,2 @@
+MBS1250		KEYWORD1
+readVoltage KEYWORD2
