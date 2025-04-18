@@ -2,3 +2,5 @@ MBS1250			KEYWORD1
 readVoltage 	KEYWORD2
 readPressure	KEYWORD2
 enableClamping  KEYWORD2
+getPressureMin	KEYWORD2
+getPressureMax  KEYWORD2

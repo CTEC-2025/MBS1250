@@ -29,7 +29,22 @@ float MBS1250::readVoltage() {
 	return voltage;
 }
 
-float MBS1250::readPressure() {
+float MBS1250::readPressure(const String& unit) {
 	float voltage = readVoltage();
-	return (voltage - 0.5) * (10.0 / (4.5 - 0.5));
+	float pressureBar = (voltage - 0.5) * (_pMax / (4.5 - 0.5));
+	
+	if (unit == "psi" {
+		return pressureBar * 14.5038;
+	} else if (unit == "kPa") {
+		return pressureBar * 100.0;
+	} else {
+		return pressureBar; // Default To BAR
+}
+
+float MBS1250::getPressureMin() {
+	return _pMin;
+}
+
+float MBS1250::getPressureMax() {
+	return _pMax;
 }

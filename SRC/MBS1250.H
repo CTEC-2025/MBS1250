@@ -5,22 +5,24 @@
 
 class MBS1250 {
 public:
-	// Create Sensor Object On Specified Analog Pin, With Optional Reference Voltage
 	MBS1250(uint8_t pin, float vRef =5.0);
 	
-	// Enable Or Disable Voltage Clamping (Default: True)
 	void enableClamping(bool on);
 	
-	// Returns Raw Or Clamped Analog Voltage in Volts
 	float readVoltage();
+	float readPressure(const String& unit = "BAR");
 	
-	// Converts Voltage To Pressure In Bar
-	float readPressure();
+	float getPressureMin();
+	float getPressureMax();
 	
 private:
 	uint8_t _pin;
 	float _vRef;
 	bool _clampEnabled = true;
+	
+	// Sensor Pressure Range (Defaults For 10 BAR Sensor)
+	const float _pMin = 0.0;
+	const float _pMax = 10.0;
 };
 
 #endif
