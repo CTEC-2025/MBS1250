@@ -7,6 +7,9 @@ void setup() {
 }
 
 void loop() {
-	Serial.println(sensor.readVoltage());
+	Serial.print("Pressure: ");
+	Serial.print(sensor.readPressure(), 2);
+	Serial.println(" Bar");
+	
 	delay(1000);
 }

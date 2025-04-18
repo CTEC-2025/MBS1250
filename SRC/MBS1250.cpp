@@ -13,3 +13,9 @@ MBS1250::MBS1250(uint8_t pin) {
 float MBS1250::readVoltage() {
 	return analogRead(_pin) * (5.0 /1023);
 }
+
+float MBS1250::readPressure() {
+	float voltage = readVoltage();
+	// 0.5V = 0 Bar, 4.5V = 10Bar
+	return (voltage - 0.5) * (10.0 / (4.5 - 0.5));
+}

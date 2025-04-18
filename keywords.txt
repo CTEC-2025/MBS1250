@@ -1,2 +1,3 @@
-MBS1250		KEYWORD1
-readVoltage KEYWORD2
+MBS1250			KEYWORD1
+readVoltage 	KEYWORD2
+readPressure	KEYWORD2
