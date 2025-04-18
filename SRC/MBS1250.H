@@ -5,10 +5,16 @@
 
 class MBS1250 {
 public:
-	MBS1250(uint8_t, float vRef =5.0);
+	// Create Sensor Object On Specified Analog Pin, With Optional Reference Voltage
+	MBS1250(uint8_t pin, float vRef =5.0);
+	
+	// Enable Or Disable Voltage Clamping (Default: True)
 	void enableClamping(bool on);
 	
+	// Returns Raw Or Clamped Analog Voltage in Volts
 	float readVoltage();
+	
+	// Converts Voltage To Pressure In Bar
 	float readPressure();
 	
 private:

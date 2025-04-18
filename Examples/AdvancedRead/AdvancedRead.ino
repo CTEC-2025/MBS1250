@@ -1,14 +1,13 @@
 #include <MBS1250.h>
 
-// Simulate Use On A 3.3V Board
-MBS1250 sensor(A0, 3.3);
+MBS1250 sensor(A0, 3.3); // For Use On 3.3V Boards
 
 void setup() {
 	Serial.begin(9600);
 	delay(1000);
 	
-	// Toggle Clamping ON (Default) Or OFF For Diagmostics
-	sensor.enableClamping(true);
+	// Optional: Disable Voltage Clamping For Diagnostics
+	// sensor.enableClamping(true);
 }
 
 void loop() {
@@ -17,7 +16,7 @@ void loop() {
 	
 	Serial.print("Voltage: ");
 	Serial.print(voltage, 3);
-	Serial.print(" V    |    Pressure: ");
+	Serial.print(" V | Pressure: ");
 	Serial.print(pressure, 2);
 	Serial.println(" BAR");
 	

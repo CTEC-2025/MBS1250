@@ -7,7 +7,9 @@ MBS1250::MBS1250(uint8_t pin, float vRef) {
 
 	#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
 		if (_pin < A0 || _pin > A5) {
-			Serial.println("[MBS1250] Warning; This May Not Be An Anlog Input Pin.");
+			Serial.print("[MBS1250] Warning: Pin ");
+			Serial.print(_pin);
+			Serial.println(" May Not Be An Analog Input On Uno/Nano.");
 		}
 	#endif
 }
@@ -29,6 +31,5 @@ float MBS1250::readVoltage() {
 
 float MBS1250::readPressure() {
 	float voltage = readVoltage();
-	// 0.5V = 0 Bar, 4.5V = 10Bar
 	return (voltage - 0.5) * (10.0 / (4.5 - 0.5));
 }
