@@ -5,7 +5,7 @@ MBS1250::MBS1250(uint8_t pin, float vRef) {
 	_vRef = vRef;
 }
 
-#if defined(ARDUINO_AVR_UNO || defined(ARDUINO_AVR_NANO)
+#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
 	if (_pin < A0 || _pin > A5) {
 		Serial.println("[MBS1250] Warning; This May Not Be An Anlog Input Pin.");
 	}
