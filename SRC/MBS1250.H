@@ -7,10 +7,12 @@ class MBS1250 {
 public:
 	MBS1250(uint8_t pin, float vRef =5.0);
 	
+	void begin();									//Standard Arduino-Style Init Method
 	void enableClamping(bool on);
 	
-	float readVoltage();
-	float readPressure(const String& unit = "BAR");
+	float readVoltage();							// Clamped Voltage (0.5-4.5V)
+	float readRawPressure();						// Raw Unclamped Pressure In BAR
+	float readPressure(const String& unit = "BAR");	
 	
 	float getPressureMin();
 	float getPressureMax();
@@ -20,9 +22,8 @@ private:
 	float _vRef;
 	bool _clampEnabled = true;
 	
-	// Sensor Pressure Range (Defaults For 10 BAR Sensor)
-	const float _pMin = 0.0;
-	const float _pMax = 10.0;
+	float _pMin;
+	float _pMax;
 };
 
 #endif
