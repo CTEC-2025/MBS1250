@@ -1,11 +1,11 @@
 # MBS1250 Arduino Library
 
-## Version: 0.5.0 ##
+## Version: 0.6.0 ##
 A Lightweight Arduino Library For Reading Analog Voltage And Calculating Pressure From The Danfoss MBS1250 Sensor (10Bar Varient).
 
-## What's New In v0.5.0
+## What's New In v0.6.0
 
-- New Example Sketch: 'FullFeatureDemo'
+- Ability To Monitor System Vcc Usin Internal 1.1V  Reference
 
 ## Full Function Reference
 
@@ -19,4 +19,5 @@ A Lightweight Arduino Library For Reading Analog Voltage And Calculating Pressur
 | 'getPressureMin()'			| Returns Sensor's Minimum Pressure
 | 'getPressureMax()'			| Returns Sensor's Maximum Pressure
 | 'isPressureOutOfRange()'		| Returns True If Voltage is Outside 0.45-4.55V
+| 'getSupplyVoltage()'			| Measures Vcc Using Internal 1.1V Reference(AVR Only)
 

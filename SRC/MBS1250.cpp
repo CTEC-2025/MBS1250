@@ -64,3 +64,20 @@ bool MBS1250::isPressureOutOfRange() {
 	float voltage = analogRead(_pin) * (_vRef / 1023);
 	return (voltage < 0.45 || voltage > 4.55);
 }
+
+float MBS1250::getSupplyVoltage() {
+	#if defined(__AVR__)
+		// Set ADC To Mesure Internal 1.1V Reference
+		ADMUX = (_pin & 0x07) | (1 << REFS0) | (1 << MUX3) | (1 << MUX2) | (1 << MUX1);
+		delay(2); // Allow Vref To Settle
+		
+		ADCSRA |= (1 << ADSC); // Start Conversion
+		while (ADCSRA & (1 << ADSC)); // Wait For Completion
+		
+		uint16_t result = ADC;
+		float vcc = (1.1 * 1023) / result; // Vcc In Volts
+		return vcc;
+	#else
+		return -1.0; // Not Supported On Non-AVR
+	#endif
+}

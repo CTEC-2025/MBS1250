@@ -19,6 +19,8 @@ public:
 	
 	bool isPressureOutOfRange();					// Simple Diagnostic Method
 	
+	float getSupplyVoltage();
+	
 private:
 	uint8_t _pin;
 	float _vRef;

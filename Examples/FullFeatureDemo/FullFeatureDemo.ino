@@ -43,6 +43,10 @@ void loop() {
 	Serial.print(sensor.getPressureMax());
 	Serial.println(" Bar");
 	
+	Serial.print("Measured Vcc: ");
+	Serial.print(sensor.getSupplyVoltage(), 3);
+	Serial.println(" V");
+	
 	if (outOfRange) {
 		Serial.println("[Warning] Sensor Voltage Out Of Range (0.45V-4.55V)");
 	}

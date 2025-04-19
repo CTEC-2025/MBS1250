@@ -7,3 +7,4 @@ enableClamping  		KEYWORD2
 getPressureMin			KEYWORD2
 getPressureMax  		KEYWORD2
 isPressureOutOfRange 	KEYWORD2
+getSupplyVoltage		KEYWORD2
