@@ -63,6 +63,7 @@ float MBS1250::readSmoothedPressure(int samples, const String& unit) {
 		total += readPressure(unit);
 		delay(2);
 	}
+	return total / samples;
 }
 
 float MBS1250::getPressureMin() {
