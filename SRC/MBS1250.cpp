@@ -48,7 +48,7 @@ float MBS1250::readPressure(const String& unit) {
 	} else if (unit == "kPa") {
 		return pressureBar * 100.0;
 	} else {
-		return pressureBar; // Default To BAR
+		return pressureBar; 
 	}
 }
 
@@ -58,4 +58,9 @@ float MBS1250::getPressureMin() {
 
 float MBS1250::getPressureMax() {
 	return _pMax;
+}
+
+bool MBS1250::isPressureOutOfRange() {
+	float voltage = analogRead(_pin) * (_vRef / 1023);
+	return (voltage < 0.45 || voltage > 4.55);
 }
