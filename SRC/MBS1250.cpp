@@ -4,6 +4,7 @@ MBS1250::MBS1250(uint8_t pin, float vRef) {
 	_pin = pin;
 	_vRef = vRef;
 	_clampEnabled = true;
+	_zeroOffset = 0.0;
 	
 	_pMin = 0.0;
 	_pMax = 10.0;
@@ -21,6 +22,10 @@ void MBS1250::begin() {
 
 void MBS1250::enableClamping(bool on) {
 	_clampEnabled = on;
+}
+
+void MBS1250::setZeroOffset(float offsetBar) {
+	_zeroOffset = offsetBar;
 }
 
 float MBS1250::readVoltage() {
@@ -52,6 +57,14 @@ float MBS1250::readPressure(const String& unit) {
 	}
 }
 
+float MBS1250::readSmoothedPressure(int samples, const String& unit) {
+	float total = 0.0;
+	for (int i = 0; i < samples; i++) {
+		total += readPressure(unit);
+		delay(2);
+	}
+}
+
 float MBS1250::getPressureMin() {
 	return _pMin;
 }
@@ -63,6 +76,11 @@ float MBS1250::getPressureMax() {
 bool MBS1250::isPressureOutOfRange() {
 	float voltage = analogRead(_pin) * (_vRef / 1023);
 	return (voltage < 0.45 || voltage > 4.55);
+}
+
+bool MBS1250::isSensorConnected() {
+	float voltage = analogRead(_pin) * (_vRef / 1023.0);
+	return (voltage > 0.1 && voltage < (_vRef - 0.1));
 }
 
 float MBS1250::getSupplyVoltage() {

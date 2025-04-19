@@ -8,3 +8,6 @@ getPressureMin			KEYWORD2
 getPressureMax  		KEYWORD2
 isPressureOutOfRange 	KEYWORD2
 getSupplyVoltage		KEYWORD2
+setZeroOffset			KEYWORD2
+readSmoothedPressure	KEYWORD2
+isSensorConnected		KEYWORD2
