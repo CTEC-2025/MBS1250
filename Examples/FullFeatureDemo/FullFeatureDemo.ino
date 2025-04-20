@@ -1,56 +1,36 @@
 #include <MBS1250.h>
 
-MBS1250 sensor(A0, 5.0);			// Analog Pin And Reference Voltage
+MBS1250 sensor(A0, 5.0);							// Analog Pin And Reference Voltage
 
 void setup() {
 	Serial.begin(9600);
-	sensor.begin();					// Optional Board-Specific Analog Pin Check
+	sensor.begin();									// Optional Board-Specific Analog Pin Check
+	
+	sensor.setZeroOffset(-0.05);
 }
 
 void loop() {
-	float voltage = sensor.readVoltage();
-	float rawBar = sensor.readRawPressure();
+	 float voltage = sensor.readVoltage();
+	float rawPressure = sensor.readRawPressure();
 	float pressureBar = sensor.readPressure("bar");
 	float pressurePsi = sensor.readPressure("psi");
-	float pressureKpa = sensor.readPressure("kPa");
+	float pressureKPa = sensor.readPressure("kPa");
+	float smoothedPressure = sensor.readSmoothedPressure(10, "bar");
 	bool outOfRange = sensor.isPressureOutOfRange();
-	
-	Serial.println("----- MBS1250 Diagnostic Readout -----");
-	
-	Serial.print("Voltage (Clamped): ");
-	Serial.print(voltage, 3);
-	Serial.println(" V");
-	
-	Serial.print("Pressure (Raw): ");
-	Serial.print(rawBar, 2);
-	Serial.println(" Bar");
-	
-	Serial.print("Pressure (Bar): ");
-	Serial.print(pressureBar, 2);
-	Serial.println(" Bar");
-	
-	Serial.print("Pressure (psi): ");
-	Serial.print(pressurePsi, 2);
-	Serial.println(" psi");
-	
-	Serial.print("Pressure (kPa): ");
-	Serial.print(pressureKpa, 1);
-	Serial.println(" kPa");
-	
-	Serial.print("Min Pressure: ");
-	Serial.print(sensor.getPressureMin());
-	Serial.print(" Bar | Max Pressure: ");
-	Serial.print(sensor.getPressureMax());
-	Serial.println(" Bar");
-	
-	Serial.print("Measured Vcc: ");
-	Serial.print(sensor.getSupplyVoltage(), 3);
-	Serial.println(" V");
-	
+	bool connected = sensor.isSensorConnected();
+
+	Serial.println("----- Full Feature Demo -----");
+	Serial.print("Voltage (clamped): "); Serial.print(voltage, 3); Serial.println(" V");
+	Serial.print("Raw Pressure: "); Serial.print(rawPressure, 2); Serial.println(" bar");
+	Serial.print("Pressure (bar): "); Serial.print(pressureBar, 2); Serial.println(" bar");
+	Serial.print("Pressure (psi): "); Serial.print(pressurePsi, 2); Serial.println(" psi");
+	Serial.print("Pressure (kPa): "); Serial.print(pressureKPa, 1); Serial.println(" kPa");
+	Serial.print("Smoothed Pressure: "); Serial.print(smoothedPressure, 2); Serial.println(" bar");
+	Serial.print("Sensor Connected: "); Serial.println(connected ? "Yes" : "No");
 	if (outOfRange) {
-		Serial.println("[Warning] Sensor Voltage Out Of Range (0.45V-4.55V)");
+		Serial.println("[Warning] Sensor voltage out of calibrated range!");
 	}
-	
-	Serial.println("--------------------------------------\n");
+	Serial.println("------------------------------\n");
+
 	delay(1500);
 }

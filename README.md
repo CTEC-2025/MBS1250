@@ -1,29 +1,41 @@
 # MBS1250 Arduino Library
 
-## Version: 0.7.5 ##
+## Version: 0.8.0 ##
 A Lightweight Arduino Library For Reading Analog Voltage And Calculating Pressure From The Danfoss MBS1250 Sensor (10Bar Varient).
 
-## What's New In v0.7.5
+## What's New In v0.8.0
 
-- Final Code Cleanup And Polish Before 1.0.0
-- Organized Source For Clarity And Long Term Stability
-- Removed Redundant Logic Without Altering Functionality
-- Updated Function Reference And Keywords
+- **Custom Calibration:** 
+  - `setCalibration(vMin, vMax, pMin, pMax)` to map any sensor's voltage range to the corresponding pressure.
+  - `resetCalibration()` to restore default values (0.5V–4.5V → 0–10 bar).
+- **Zero Offset Calibration:** 
+  - `setZeroOffset(offsetBar)` allows fine-tuning of the pressure output.
+- Added getters for the voltage range: `getVoltageMin()` and `getVoltageMax()`.
+- The pressure conversion now uses the customizable calibration parameters.
+- Extended documentation and updated examples.
 
-## Full Function Reference
+## Function Reference
 
-| Method						  | Description
-|---------------------------------|-----------------------------------------------------------
-| 'begin()'						  | Optional Arduino-Style Init
-| 'readVoltage()'				  | Returns Clamped Voltage In Volts (Default 0.5-4.5V)
-| 'readRawPressure()'			  | Returns Pressure In Bar Using Unclamped Voltage
-| 'readPressure(unit)'			  | Returns Pressure In '"BAR"' (Default, '"psi"', Or '"kPa"'
-| 'enableClamping(true/false)'	  | Turns Voltage Clamping On Or Off
-| 'getPressureMin()'			  | Returns Sensor's Minimum Pressure
-| 'getPressureMax()'			  | Returns Sensor's Maximum Pressure
-| 'isPressureOutOfRange()'		  | Returns True If Voltage is Outside 0.45-4.55V
-| 'getSupplyVoltage()'			  | Measures Vcc Using Internal 1.1V Reference(AVR Only)
-| 'setZeroOffset(offsetBar)'      | Adjust Pressure Baseline Calibration Offset
-| 'readSmoothedPressure(n, unit)' | Returns Averaged Pressure Reading (Default: 10)
-| 'isSensorConnected()'			  | Returns False If Voltage ~0 Or Vref (Fault Check)
+| Method                            | Description                                                     |
+|-----------------------------------|-----------------------------------------------------------------|
+| `begin()`                         | Initializes the sensor and performs board-specific checks.      |
+| `readVoltage()`                   | Returns clamped sensor voltage in volts (based on calibration). |
+| `readRawPressure()`               | Returns raw pressure calculated from the sensor voltage.        |
+| `readPressure(unit)`              | Returns pressure in the requested unit ("bar", "psi", "kPa").   |
+| `readSmoothedPressure(n, unit)`   | Averages multiple pressure readings for noise reduction.        |
+| `setZeroOffset(offsetBar)`        | Adjusts the baseline pressure reading.                          |
+| `setCalibration(vMin, vMax, pMin, pMax)` | Sets a custom calibration mapping.                       |
+| `resetCalibration()`              | Resets calibration parameters to default.                       |
+| `isPressureOutOfRange()`          | Checks if the measured voltage is outside calibrated range (with a ±0.05V margin). |
+| `isSensorConnected()`             | Determines if the sensor appears to be properly connected.      |
+| `getSupplyVoltage()`              | Returns the board supply voltage (AVR only).                    |
+| `getPressureMin()/getPressureMax()` | Returns the calibrated pressure range.                        |
+| `getVoltageMin()/getVoltageMax()`   | Returns the calibrated voltage range.                         |
 
+...
+
+## Installation
+
+1. Clone or download this repository.
+2. Place the folder into your Arduino `libraries/` directory.
+3. Restart the Arduino IDE.

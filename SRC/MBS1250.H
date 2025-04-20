@@ -15,6 +15,10 @@ public:
 	void enableClamping(bool on);
 	void setZeroOffset(float offsetBar);
 
+	// Calibration Functions
+	void setCalibration(float vMin, float vMax, float pMin, float pMax);
+	void resetCalibration();
+
 	// Pressure Readings:
 	float readVoltage();							// Clamped Voltage (Default)
 	float readRawPressure();						// Raw Unclamped Pressure In BAR
@@ -29,12 +33,18 @@ public:
 	// Pressure Sensor Spec Access:
 	float getPressureMin();
 	float getPressureMax();
+	float getVoltageMin();
+	float getVoltageMax();
 		
 private:
 	uint8_t _pin;
 	float _vRef;
 	bool _clampEnabled = true;
 	float _zeroOffset;
+	
+	// Calibration Parameters
+	float _vMin;
+	float _vMax;
 	float _pMin;
 	float _pMax;
 };

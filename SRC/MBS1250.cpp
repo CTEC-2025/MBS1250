@@ -6,6 +6,9 @@ MBS1250::MBS1250(uint8_t pin, float vRef) {
 	_clampEnabled = true;
 	_zeroOffset = 0.0;
 	
+	// Default Calibration
+	_vMin = 0.5;
+	_vMax = 4.5;
 	_pMin = 0.0;
 	_pMax = 10.0;
 }
@@ -26,6 +29,21 @@ void MBS1250::enableClamping(bool on) {
 
 void MBS1250::setZeroOffset(float offsetBar) {
 	_zeroOffset = offsetBar;
+}
+
+void MBS1250::setCalibration(float vMin, float vMax, float pMin, float pMax)
+{
+	_vMin = vMin;
+	_vMax = vMax;
+	_pMin = pMin;
+	_pMax = pMax;
+}
+
+void MBS1250::resetCalibration() {
+	_vMin = 0.5;
+	_vMax = 4.5;
+	_pMin = 0.0;
+	_pMax = 10.0;
 }
 
 float MBS1250::readVoltage() {
@@ -72,6 +90,14 @@ float MBS1250::getPressureMin() {
 
 float MBS1250::getPressureMax() {
 	return _pMax;
+}
+
+float MBS1250::getVoltageMin() {
+	return _vMin;
+}
+
+float MBS1250::getVoltageMax() {
+	return _vMax;
 }
 
 bool MBS1250::isPressureOutOfRange() {
