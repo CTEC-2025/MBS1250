@@ -2,6 +2,7 @@
 #define MBS1250_H
 
 #include <Arduino.h>
+#include <EEPROM.h>
 
 class MBS1250 {
 public:
@@ -14,10 +15,12 @@ public:
 	// Configuration:
 	void enableClamping(bool on);
 	void setZeroOffset(float offsetBar);
-
-	// Calibration Functions
 	void setCalibration(float vMin, float vMax, float pMin, float pMax);
 	void resetCalibration();
+	
+	// EEPROM
+	void saveCalibrationToEEPROM();
+	void loadCalibrationFromEEPROM();
 
 	// Pressure Readings:
 	float readVoltage();							// Clamped Voltage (Default)
@@ -47,6 +50,8 @@ private:
 	float _vMax;
 	float _pMin;
 	float _pMax;
+	
+	float _voltageToPressure(float voltage);
 };
 
 #endif

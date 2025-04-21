@@ -1,5 +1,10 @@
 #include "MBS1250.h"
 
+struct MBS1250Config {
+	float vMin, vMax, pMin, pMax, zeroOffset;
+	uint16_t checksum;
+};
+
 MBS1250::MBS1250(uint8_t pin, float vRef) {
 	_pin = pin;
 	_vRef = vRef;
@@ -23,13 +28,8 @@ void MBS1250::begin() {
 	#endif
 }
 
-void MBS1250::enableClamping(bool on) {
-	_clampEnabled = on;
-}
-
-void MBS1250::setZeroOffset(float offsetBar) {
-	_zeroOffset = offsetBar;
-}
+void MBS1250::enableClamping(bool on) { _clampEnabled = on; }
+void MBS1250::setZeroOffset(float offsetBar) { _zeroOffset = offsetBar; }
 
 void MBS1250::setCalibration(float vMin, float vMax, float pMin, float pMax)
 {
@@ -46,63 +46,69 @@ void MBS1250::resetCalibration() {
 	_pMax = 10.0;
 }
 
-float MBS1250::readVoltage() {
-	float voltage = analogRead(_pin) * (_vRef / 1023.0);
-	
-	if (_clampEnabled) {
-		if (voltage < 0.5) voltage = 0.5;
-		if (voltage > 4.5) voltage = 4.5;
+void MBS1250::saveCalibrationToEEPROM() {
+	MBS1250Config config = {_vMin, _vMax, _pMin, _pMax, _zeroOffset, 0xABCD};
+	EEPROM.put(0, config);
+}
+
+void MBS1250::loadCalibrationFromEEPROM() {
+	MBS1250Config config;
+	EEPROM.get(0, config);
+	if (config.checksum == 0xABCD) {
+		_vMin = config.vMin;
+		_vMax = config.vMax;
+		_pMin = config.pMin;
+		_pMax = config.pMax;
+		_zeroOffset = config.zeroOffset;
+	} else {
+		Serial.println("[MBS1250] EEPROM Checksum Invalid. Using Defaults.");
 	}
-	
-	return voltage;
+}
+
+float MBS1250::_voltageToPressure(float voltage) {
+	return (voltage - _vMin) * ((_pMax - _pMin) / (_vMax - _vMin)) + _pMin;
+}
+
+float MBS1250::readVoltage() {
+    float voltage = analogRead(_pin) * (_vRef / 1023.0);
+    if (_clampEnabled) {
+        if (voltage < _vMin) voltage = _vMin;
+        if (voltage > _vMax) voltage = _vMax;
+    }
+    return voltage;
 }
 
 float MBS1250::readRawPressure() {
-	float rawVoltage = analogRead(_pin) * (_vRef /1023.0);
-	return (rawVoltage - 0.5) * (_pMax / (4.5 - 0.5));
+    float rawVoltage = analogRead(_pin) * (_vRef / 1023.0);
+    return _voltageToPressure(rawVoltage);
 }
 
 float MBS1250::readPressure(const String& unit) {
-	float voltage = readVoltage();
-	float pressureBar = (voltage - 0.5) * (_pMax / (4.5 - 0.5));
-	
-	if (unit == "psi") {
-		return pressureBar * 14.5038;
-	} else if (unit == "kPa") {
-		return pressureBar * 100.0;
-	} else {
-		return pressureBar; 
-	}
+    float pressureBar = _voltageToPressure(readVoltage()) + _zeroOffset;
+    if (unit == "psi") return pressureBar * 14.5038;
+    if (unit == "kPa") return pressureBar * 100.0;
+    return pressureBar;
 }
 
 float MBS1250::readSmoothedPressure(int samples, const String& unit) {
-	float total = 0.0;
-	for (int i = 0; i < samples; i++) {
-		total += readPressure(unit);
-		delay(2);
-	}
-	return total / samples;
+    if (samples < 1) samples = 1;
+    if (samples > 100) samples = 100;
+    float sum = 0.0;
+    for (int i = 0; i < samples; i++) {
+        sum += readPressure(unit);
+        delay(2);
+    }
+    return sum / samples;
 }
 
-float MBS1250::getPressureMin() {
-	return _pMin;
-}
-
-float MBS1250::getPressureMax() {
-	return _pMax;
-}
-
-float MBS1250::getVoltageMin() {
-	return _vMin;
-}
-
-float MBS1250::getVoltageMax() {
-	return _vMax;
-}
+float MBS1250::getPressureMin() { return _pMin; }
+float MBS1250::getPressureMax() { return _pMax; }
+float MBS1250::getVoltageMin() { return _vMin; }
+float MBS1250::getVoltageMax() { return _vMax; }
 
 bool MBS1250::isPressureOutOfRange() {
-	float voltage = analogRead(_pin) * (_vRef / 1023);
-	return (voltage < 0.45 || voltage > 4.55);
+    float voltage = analogRead(_pin) * (_vRef / 1023.0);
+    return (voltage < (_vMin - 0.05) || voltage > (_vMax + 0.05));
 }
 
 bool MBS1250::isSensorConnected() {
