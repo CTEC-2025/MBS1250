@@ -1,19 +1,11 @@
 # MBS1250 Arduino Library
 
-🎉 v1.0.0 – First Stable Release
-The MBS1250 Arduino Library is now complete, tested, and stable!
+### 🔄 New in v1.1.0
 
-## Features In V1.0.0
-
-- ✅ Voltage-to-pressure conversion (0.5–4.5V default)
-- ✅ Unit output in **bar**, **psi**, or **kPa**
-- ✅ Custom calibration: `setCalibration(vMin, vMax, pMin, pMax)`
-- ✅ Zero offset adjustment
-- ✅ Pressure smoothing via averaging
-- ✅ Sensor diagnostics (disconnection + out-of-range)
-- ✅ Supply voltage measurement (AVR only)
-- ✅ EEPROM save/load of calibration and offset
-- ✅ Clean, Arduino-friendly API
+- 🔁 **EMA Smoothing**: Enable exponential moving average filtering with `enableEMASmoothing()` and read with `readPressureEMA()`.
+- 📉 **Clamping Detection**: Use `isClamped()` to check if the last voltage was limited to calibration bounds.
+- 🧾 **Last Value Tracking**: Retrieve the last voltage or pressure reading using `getLastVoltage()` and `getLastPressure()`.
+- 🪛 **Debug Mode**: Enable debug Serial output with `enableDebug(true)` for development insights.
 
 ## Function Reference
 
@@ -34,6 +26,12 @@ The MBS1250 Arduino Library is now complete, tested, and stable!
 | `getSupplyVoltage()`              | Returns the board supply voltage (AVR only).                    |
 | `getPressureMin()/getPressureMax()` | Returns the calibrated pressure range.                        |
 | `getVoltageMin()/getVoltageMax()`   | Returns the calibrated voltage range.                         |
+| `enableEMASmoothing(enabled, alpha)` | Enables EMA smoothing and sets smoothing factor     		  |
+| `readPressureEMA(unit)`              | Returns pressure with EMA filtering applied          		  |
+| `isClamped()`                        | Returns `true` if the last read voltage was clamped  		  |
+| `getLastVoltage()`                  | Returns the most recent sensor voltage               		  |
+| `getLastPressure()`                 | Returns the most recent pressure (in bar)            		  |
+| `enableDebug(true/false)`           | Turns on/off internal debug print statements         		  |
 
 ### Supported Hardware
 

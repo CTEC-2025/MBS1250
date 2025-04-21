@@ -24,6 +24,16 @@ public:
     float readRawPressure();                                 				  // Unclamped pressure
     float readPressure(const String& unit = "bar");           				  // With zero offset
     float readSmoothedPressure(int samples = 10, const String& unit = "bar");
+	
+	// V1.1.0: Advanced Smoothing
+	void enableEMASmoothing(bool enabled, float alpha = 0.2);
+	float readPressureEMA(const String& unit = "bar");
+	
+	// V1.1.0: Diagnostics & Debug
+	bool isClamped();														  // True If Last Voltage Was Clamped
+	float getLastVoltage();													  // Last Voltage Read
+	float getLastPressure();												  // Last Pressure In BAR
+	void enableDebug(bool on);												  // Enables Serial Debug Output
 
     // Diagnostics
     bool isPressureOutOfRange();
@@ -43,6 +53,15 @@ private:
     float _zeroOffset;
     float _vMin, _vMax;
     float _pMin, _pMax;
+
+	// V1.1.0 State
+	bool _debugEnabled;
+	bool _clampedLastRead;
+	bool _emaEnabled;
+	float _emaAlpha;
+	float _emaPressure;
+	float _lastVoltage;
+	float _lastPressure;
 
     float _voltageToPressure(float voltage);
 };

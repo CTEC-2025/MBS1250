@@ -17,3 +17,11 @@ getPressureMin            KEYWORD2
 getPressureMax            KEYWORD2
 getVoltageMin             KEYWORD2
 getVoltageMax             KEYWORD2
+
+# v1.1.0 additions
+enableEMASmoothing        KEYWORD2
+readPressureEMA           KEYWORD2
+isClamped                 KEYWORD2
+getLastVoltage            KEYWORD2
+getLastPressure           KEYWORD2
+enableDebug               KEYWORD2

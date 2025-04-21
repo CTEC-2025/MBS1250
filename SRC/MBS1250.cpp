@@ -1,6 +1,6 @@
 #include "MBS1250.h"
 
-// Struct used for EEPROM calibration storage
+// EEPROM storage struct
 struct MBS1250Config {
     float vMin, vMax;
     float pMin, pMax;
@@ -10,10 +10,20 @@ struct MBS1250Config {
 
 // Constructor
 MBS1250::MBS1250(uint8_t pin, float vRef)
-  : _pin(pin), _vRef(vRef), _clampEnabled(true), _zeroOffset(0.0),
-    _vMin(0.5), _vMax(4.5), _pMin(0.0), _pMax(10.0) {}
+  : _pin(pin), _vRef(vRef),
+    _clampEnabled(true),
+    _zeroOffset(0.0),
+    _vMin(0.5), _vMax(4.5),
+    _pMin(0.0), _pMax(10.0),
+    // v1.1.0 initial states
+    _debugEnabled(false),
+    _clampedLastRead(false),
+    _emaEnabled(false),
+    _emaAlpha(0.2),
+    _emaPressure(0.0),
+    _lastVoltage(0.0),
+    _lastPressure(0.0) {}
 
-// Optional pin validation for Uno/Nano
 void MBS1250::begin() {
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
     if (_pin < A0 || _pin > A5) {
@@ -24,7 +34,9 @@ void MBS1250::begin() {
 #endif
 }
 
+// -----------------------------
 // Configuration
+// -----------------------------
 void MBS1250::enableClamping(bool on) {
     _clampEnabled = on;
 }
@@ -47,20 +59,17 @@ void MBS1250::resetCalibration() {
     _pMax = 10.0;
 }
 
-// EEPROM: Save calibration and zeroOffset
+// -----------------------------
+// EEPROM
+// -----------------------------
 void MBS1250::saveCalibrationToEEPROM() {
-    MBS1250Config config = {
-        _vMin, _vMax, _pMin, _pMax, _zeroOffset,
-        0xABCD  // Simple checksum
-    };
+    MBS1250Config config = {_vMin, _vMax, _pMin, _pMax, _zeroOffset, 0xABCD};
     EEPROM.put(0, config);
 }
 
-// EEPROM: Load calibration and zeroOffset
 void MBS1250::loadCalibrationFromEEPROM() {
     MBS1250Config config;
     EEPROM.get(0, config);
-
     if (config.checksum == 0xABCD) {
         _vMin = config.vMin;
         _vMax = config.vMax;
@@ -72,72 +81,123 @@ void MBS1250::loadCalibrationFromEEPROM() {
     }
 }
 
-// Internal conversion from voltage to pressure (no clamping or offset)
-float MBS1250::_voltageToPressure(float voltage) {
-    return (voltage - _vMin) * ((_pMax - _pMin) / (_vMax - _vMin)) + _pMin;
-}
-
-// Read clamped voltage (0.5–4.5V default)
+// -----------------------------
+// Pressure/Voltage Readings
+// -----------------------------
 float MBS1250::readVoltage() {
     float voltage = analogRead(_pin) * (_vRef / 1023.0);
+    _lastVoltage = voltage;
+
+    _clampedLastRead = false;
     if (_clampEnabled) {
-        if (voltage < _vMin) voltage = _vMin;
-        if (voltage > _vMax) voltage = _vMax;
+        if (voltage < _vMin) {
+            voltage = _vMin;
+            _clampedLastRead = true;
+        }
+        if (voltage > _vMax) {
+            voltage = _vMax;
+            _clampedLastRead = true;
+        }
     }
+
+    if (_debugEnabled) {
+        Serial.print("[MBS1250] Voltage: ");
+        Serial.println(voltage, 3);
+    }
+
     return voltage;
 }
 
-// Read raw pressure from sensor (no clamping or offset)
 float MBS1250::readRawPressure() {
     float rawVoltage = analogRead(_pin) * (_vRef / 1023.0);
     return _voltageToPressure(rawVoltage);
 }
 
-// Read pressure in specified unit with clamping + zeroOffset
 float MBS1250::readPressure(const String& unit) {
     float pressureBar = _voltageToPressure(readVoltage()) + _zeroOffset;
+    _lastPressure = pressureBar;
 
-    if (unit == "psi")      return pressureBar * 14.5038;
-    if (unit == "kPa")      return pressureBar * 100.0;
+    if (unit == "psi") return pressureBar * 14.5038;
+    if (unit == "kPa") return pressureBar * 100.0;
     return pressureBar;
 }
 
-// Smoothed pressure using N samples
 float MBS1250::readSmoothedPressure(int samples, const String& unit) {
     if (samples < 1) samples = 1;
     if (samples > 100) samples = 100;
 
-    float total = 0.0;
+    float sum = 0.0;
     for (int i = 0; i < samples; i++) {
-        total += readPressure(unit);
-        delay(2);  // ADC settle time
+        sum += readPressure(unit);
+        delay(2);
     }
-    return total / samples;
+    return sum / samples;
 }
 
-// Calibration access
-float MBS1250::getPressureMin() { return _pMin; }
-float MBS1250::getPressureMax() { return _pMax; }
-float MBS1250::getVoltageMin()  { return _vMin; }
-float MBS1250::getVoltageMax()  { return _vMax; }
+// -----------------------------
+// v1.1.0: EMA Smoothing
+// -----------------------------
+void MBS1250::enableEMASmoothing(bool enabled, float alpha) {
+    _emaEnabled = enabled;
+    _emaAlpha = constrain(alpha, 0.01, 0.99);
+}
 
-// Diagnostic: Out-of-range voltage detection
+float MBS1250::readPressureEMA(const String& unit) {
+    float current = _voltageToPressure(readVoltage()) + _zeroOffset;
+    if (_emaEnabled) {
+        _emaPressure = (_emaAlpha * current) + ((1.0 - _emaAlpha) * _emaPressure);
+    } else {
+        _emaPressure = current;
+    }
+
+    _lastPressure = _emaPressure;
+
+    if (_debugEnabled) {
+        Serial.print("[MBS1250] EMA: ");
+        Serial.println(_emaPressure, 3);
+    }
+
+    if (unit == "psi") return _emaPressure * 14.5038;
+    if (unit == "kPa") return _emaPressure * 100.0;
+    return _emaPressure;
+}
+
+// -----------------------------
+// v1.1.0: Diagnostics & State Access
+// -----------------------------
+bool MBS1250::isClamped() {
+    return _clampedLastRead;
+}
+
+float MBS1250::getLastVoltage() {
+    return _lastVoltage;
+}
+
+float MBS1250::getLastPressure() {
+    return _lastPressure;
+}
+
+void MBS1250::enableDebug(bool on) {
+    _debugEnabled = on;
+}
+
+// -----------------------------
+// Diagnostics
+// -----------------------------
 bool MBS1250::isPressureOutOfRange() {
     float voltage = analogRead(_pin) * (_vRef / 1023.0);
     return (voltage < (_vMin - 0.05) || voltage > (_vMax + 0.05));
 }
 
-// Diagnostic: Sensor connection test
 bool MBS1250::isSensorConnected() {
     float voltage = analogRead(_pin) * (_vRef / 1023.0);
     return (voltage > 0.1 && voltage < (_vRef - 0.1));
 }
 
-// AVR-only: Internal supply voltage read using 1.1V reference
 float MBS1250::getSupplyVoltage() {
 #if defined(__AVR__)
     ADMUX = (_pin & 0x07) | (1 << REFS0) |
-            (1 << MUX3) | (1 << MUX2) | (1 << MUX1);  // Select 1.1V reference
+            (1 << MUX3) | (1 << MUX2) | (1 << MUX1);
     delay(2);
     ADCSRA |= (1 << ADSC);
     while (ADCSRA & (1 << ADSC));
@@ -145,4 +205,19 @@ float MBS1250::getSupplyVoltage() {
 #else
     return -1.0;
 #endif
+}
+
+// -----------------------------
+// Accessors
+// -----------------------------
+float MBS1250::getPressureMin() { return _pMin; }
+float MBS1250::getPressureMax() { return _pMax; }
+float MBS1250::getVoltageMin()  { return _vMin; }
+float MBS1250::getVoltageMax()  { return _vMax; }
+
+// -----------------------------
+// Internals
+// -----------------------------
+float MBS1250::_voltageToPressure(float voltage) {
+    return (voltage - _vMin) * ((_pMax - _pMin) / (_vMax - _vMin)) + _pMin;
 }
