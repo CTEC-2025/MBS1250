@@ -6,52 +6,45 @@
 
 class MBS1250 {
 public:
-	// Constructor: Specify Analog Input Pin And Optional Analog Reference Voltage.
-	MBS1250(uint8_t pin, float vRef =5.0);
-	
-	// Optional: Check Anlog Pin On AVR Boards.
-	void begin();								
+    MBS1250(uint8_t pin, float vRef = 5.0);
+    void begin();
 
-	// Configuration:
-	void enableClamping(bool on);
-	void setZeroOffset(float offsetBar);
-	void setCalibration(float vMin, float vMax, float pMin, float pMax);
-	void resetCalibration();
-	
-	// EEPROM
-	void saveCalibrationToEEPROM();
-	void loadCalibrationFromEEPROM();
+    // Configuration
+    void enableClamping(bool on);
+    void setZeroOffset(float offsetBar);
+    void setCalibration(float vMin, float vMax, float pMin, float pMax);
+    void resetCalibration();
 
-	// Pressure Readings:
-	float readVoltage();							// Clamped Voltage (Default)
-	float readRawPressure();						// Raw Unclamped Pressure In BAR
-	float readPressure(const String& unit = "BAR");	// Clamped + Scaled Pressure 
-	float readSmoothedPressure(int samples = 10, const String& unit = "bar");
-	
-	// Diagnostics:
-	bool isPressureOutOfRange();					// Simple Diagnostic Method
-	bool isSensorConnected();
-	float getSupplyVoltage();						// AVR Only	
-	
-	// Pressure Sensor Spec Access:
-	float getPressureMin();
-	float getPressureMax();
-	float getVoltageMin();
-	float getVoltageMax();
-		
+    // EEPROM
+    void saveCalibrationToEEPROM();
+    void loadCalibrationFromEEPROM();
+
+    // Readings
+    float readVoltage();                                      				  // Clamped voltage
+    float readRawPressure();                                 				  // Unclamped pressure
+    float readPressure(const String& unit = "bar");           				  // With zero offset
+    float readSmoothedPressure(int samples = 10, const String& unit = "bar");
+
+    // Diagnostics
+    bool isPressureOutOfRange();
+    bool isSensorConnected();
+    float getSupplyVoltage();  												  // AVR only
+
+    // Accessors
+    float getPressureMin();
+    float getPressureMax();
+    float getVoltageMin();
+    float getVoltageMax();
+
 private:
-	uint8_t _pin;
-	float _vRef;
-	bool _clampEnabled = true;
-	float _zeroOffset;
-	
-	// Calibration Parameters
-	float _vMin;
-	float _vMax;
-	float _pMin;
-	float _pMax;
-	
-	float _voltageToPressure(float voltage);
+    uint8_t _pin;
+    float _vRef;
+    bool _clampEnabled;
+    float _zeroOffset;
+    float _vMin, _vMax;
+    float _pMin, _pMax;
+
+    float _voltageToPressure(float voltage);
 };
 
-#endif
+#endif  // MBS1250_H

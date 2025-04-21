@@ -1,15 +1,19 @@
 # MBS1250 Arduino Library
 
-## Version: 0.9.0 ##
-A Lightweight Arduino Library For Reading Analog Voltage And Calculating Pressure From The Danfoss MBS1250 Sensor (10Bar Varient).
+🎉 v1.0.0 – First Stable Release
+The MBS1250 Arduino Library is now complete, tested, and stable!
 
-## What's New In v0.9.0
+## Features In V1.0.0
 
-- Added EEPROM Save/Load Support For Calibration + Zero Offset
-- Struct-Based, Checksum-Verified Storage
-- New Example : CalibrationEEPROM.ino
-- Smoothed Pressure Guards(Samples Limited to 1-100)
-- Final Polish And Ready For V1.0.0
+- ✅ Voltage-to-pressure conversion (0.5–4.5V default)
+- ✅ Unit output in **bar**, **psi**, or **kPa**
+- ✅ Custom calibration: `setCalibration(vMin, vMax, pMin, pMax)`
+- ✅ Zero offset adjustment
+- ✅ Pressure smoothing via averaging
+- ✅ Sensor diagnostics (disconnection + out-of-range)
+- ✅ Supply voltage measurement (AVR only)
+- ✅ EEPROM save/load of calibration and offset
+- ✅ Clean, Arduino-friendly API
 
 ## Function Reference
 
@@ -31,10 +35,23 @@ A Lightweight Arduino Library For Reading Analog Voltage And Calculating Pressur
 | `getPressureMin()/getPressureMax()` | Returns the calibrated pressure range.                        |
 | `getVoltageMin()/getVoltageMax()`   | Returns the calibrated voltage range.                         |
 
-...
+### Supported Hardware
+
+| Platform							| Notes
+|-----------------------------------|-----------------------------------------------------------------
+| Arduino Uno/Nano					| Fully Supported, Including getSupplyVoltage()
+| ESP32/ESP8266						| Fully Supported Except For Supply Voltage
+| Other Boards						| Works If analogRead() is Supported
+
 
 ## 📦 Installation
 
-1. Download or clone this repository.
-2. Place the folder in your Arduino `libraries/` directory.
-3. Restart the Arduino IDE or select **Sketch > Include Library > Add .ZIP Library**.
+### Option 1: Library Manager (coming soon)
+- Open the Arduino IDE
+- Go to **Tools > Manage Libraries...**
+- Search for `MBS1250` and click Install
+
+### Option 2: Manual
+- Download this repository as a `.zip`
+- Go to **Sketch > Include Library > Add .ZIP Library...**
+- Select the downloaded archive
