@@ -1,11 +1,11 @@
 # MBS1250 Arduino Library
 
-### 🔄 New in v1.1.0
+### 🆕 What's New in v1.2.0
 
-- 🔁 **EMA Smoothing**: Enable exponential moving average filtering with `enableEMASmoothing()` and read with `readPressureEMA()`.
-- 📉 **Clamping Detection**: Use `isClamped()` to check if the last voltage was limited to calibration bounds.
-- 🧾 **Last Value Tracking**: Retrieve the last voltage or pressure reading using `getLastVoltage()` and `getLastPressure()`.
-- 🪛 **Debug Mode**: Enable debug Serial output with `enableDebug(true)` for development insights.
+- 📋 **Sensor Health Monitoring**: `getSensorStatus()` reports if the sensor is OK, clamped, out-of-range, or disconnected.
+- 📦 **Pressure Data Struct**: `getReading()` returns full sensor snapshot (pressure, voltage, connected, clamped).
+- 🎚 **Unified Smoothing Mode**: Select NONE, AVERAGE, or EMA smoothing using `setSmoothingMode()`.
+- 🛠 **Calibration Display**: `printCalibration()` prints current calibration ranges.
 
 ## Function Reference
 
@@ -32,6 +32,11 @@
 | `getLastVoltage()`                  | Returns the most recent sensor voltage               		  |
 | `getLastPressure()`                 | Returns the most recent pressure (in bar)            		  |
 | `enableDebug(true/false)`           | Turns on/off internal debug print statements         		  |
+| `printCalibration()`              | Prints current voltage/pressure calibration values     |
+| `setSmoothingMode(mode)`           | Sets smoothing mode (none, average, EMA)               |
+| `readPressureSmoothed(unit)`       | Reads pressure with selected smoothing mode           |
+| `getSensorStatus()`                | Returns sensor status (OK, clamped, disconnected, etc.) |
+| `getReading(unit)`                 | Returns full structured snapshot of sensor values     |
 
 ### Supported Hardware
 
