@@ -1,5 +1,17 @@
 #include "MBS1250.h"
 
+/*
+ * MBS1250 Pressure Sensor Library
+ * --------------------------------
+ * Version: 1.2.5
+ * Author: [CTEC-2025]
+ *
+ * Description:
+ * Main source file for MBS1250 sensor library. Provides functionality 
+ * for voltage-to-pressure conversion, smoothing, calibration, 
+ * diagnostics, and EEPROM support.
+ */
+
 // EEPROM storage struct (internal use)
 struct MBS1250Config {
     float vMin, vMax;
@@ -8,7 +20,9 @@ struct MBS1250Config {
     uint16_t checksum;
 };
 
+// -----------------------------
 // Constructor
+// -----------------------------
 MBS1250::MBS1250(uint8_t pin, float vRef)
   : _pin(pin), _vRef(vRef),
     _clampEnabled(true),
@@ -150,7 +164,7 @@ float MBS1250::readSmoothedPressure(int samples, const String& unit) {
 }
 
 // -----------------------------
-// v1.1.0: EMA Smoothing
+// EMA Smoothing
 // -----------------------------
 void MBS1250::enableEMASmoothing(bool enabled, float alpha) {
     _emaEnabled = enabled;
@@ -178,7 +192,7 @@ float MBS1250::readPressureEMA(const String& unit) {
 }
 
 // -----------------------------
-// v1.2.0: Unified Smoothing Mode
+// Unified Smoothing Mode
 // -----------------------------
 void MBS1250::setSmoothingMode(SmoothingMode mode) {
     _smoothingMode = mode;
@@ -197,7 +211,7 @@ float MBS1250::readPressureSmoothed(const String& unit) {
 }
 
 // -----------------------------
-// v1.2.0: Sensor Status + Full Reading
+// Sensor Status & Struct-based Reading
 // -----------------------------
 SensorStatus MBS1250::getSensorStatus() {
     if (!isSensorConnected()) return SENSOR_DISCONNECTED;
@@ -253,8 +267,7 @@ bool MBS1250::isSensorConnected() {
 
 float MBS1250::getSupplyVoltage() {
 #if defined(__AVR__)
-    ADMUX = (_pin & 0x07) | (1 << REFS0) |
-            (1 << MUX3) | (1 << MUX2) | (1 << MUX1);
+    ADMUX = (_pin & 0x07) | (1 << REFS0) | (1 << MUX3) | (1 << MUX2) | (1 << MUX1);
     delay(2);
     ADCSRA |= (1 << ADSC);
     while (ADCSRA & (1 << ADSC));
@@ -265,7 +278,7 @@ float MBS1250::getSupplyVoltage() {
 }
 
 // -----------------------------
-// Internal conversion helper
+// Internal Helper
 // -----------------------------
 float MBS1250::_voltageToPressure(float voltage) {
     return (voltage - _vMin) * ((_pMax - _pMin) / (_vMax - _vMin)) + _pMin;

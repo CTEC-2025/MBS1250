@@ -1,7 +1,8 @@
 # MBS1250 Arduino Library
 
-### 🆕 What's New in v1.2.0
+### 🆕 What's New in v1.2.5
 
+- 🧹 **Code Cleanup & Polishing**: Internal code improvements and organization.
 - 📋 **Sensor Health Monitoring**: `getSensorStatus()` reports if the sensor is OK, clamped, out-of-range, or disconnected.
 - 📦 **Pressure Data Struct**: `getReading()` returns full sensor snapshot (pressure, voltage, connected, clamped).
 - 🎚 **Unified Smoothing Mode**: Select NONE, AVERAGE, or EMA smoothing using `setSmoothingMode()`.
@@ -19,8 +20,8 @@
 | `setZeroOffset(offsetBar)`        | Adjusts the baseline pressure reading.                          |
 | `setCalibration(vMin, vMax, pMin, pMax)` | Sets a custom calibration mapping.                       |
 | `resetCalibration()`              | Resets calibration parameters to default.                       |
-| 'saveCalibraionToEEPROM()' 		| Store Calibration + Offset In EEPROM							  |
-| 'loadCalibrationFromEEPROM()'     | Load Saved Values From EEPROM (If Checksum Is Valid)			  |
+| `saveCalibrationToEEPROM()`       | Store calibration and offset to EEPROM.   |
+| `loadCalibrationFromEEPROM()`      | Load saved calibration and offset from EEPROM. |
 | `isPressureOutOfRange()`          | Checks if the measured voltage is outside calibrated range (with a ±0.05V margin). |
 | `isSensorConnected()`             | Determines if the sensor appears to be properly connected.      |
 | `getSupplyVoltage()`              | Returns the board supply voltage (AVR only).                    |

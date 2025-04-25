@@ -4,7 +4,27 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-// v1.2.0: Sensor health states
+/*
+ * MBS1250 Pressure Sensor Library
+ * --------------------------------
+ * Version: 1.2.5
+ * Author: [CTEC-2025]
+ *
+ * Description:
+ * A flexible library for reading, smoothing, and diagnosing 
+ * pressure sensors like the MBS1250. Supports voltage scaling, 
+ * clamping, zero offset adjustment, EEPROM calibration storage, 
+ * and smoothing modes (Average and EMA).
+ *
+ * Change History:
+ * - v1.0.0: Initial stable release.
+ * - v1.1.0: Added diagnostics, clamping, and EMA smoothing.
+ * - v1.2.0: Added sensor health status, smoothing modes, 
+ *           struct-based readings, and calibration printing.
+ * - v1.2.5: Code cleanup, organization, and formatting polish.
+ */
+
+// Sensor health states
 enum SensorStatus {
     SENSOR_OK,
     SENSOR_DISCONNECTED,
@@ -12,7 +32,7 @@ enum SensorStatus {
     SENSOR_OUT_OF_RANGE
 };
 
-// v1.2.0: Reading structure
+// Reading structure
 struct PressureData {
     float pressure;
     float voltage;
@@ -20,7 +40,7 @@ struct PressureData {
     bool connected;
 };
 
-// v1.2.0: Smoothing strategy
+// Smoothing strategies
 enum SmoothingMode {
     SMOOTH_NONE,
     SMOOTH_AVERAGE,
@@ -29,6 +49,7 @@ enum SmoothingMode {
 
 class MBS1250 {
 public:
+    // Constructor
     MBS1250(uint8_t pin, float vRef = 5.0);
     void begin();
 
@@ -37,7 +58,7 @@ public:
     void setZeroOffset(float offsetBar);
     void setCalibration(float vMin, float vMax, float pMin, float pMax);
     void resetCalibration();
-    void printCalibration();  // v1.2.0
+    void printCalibration();    
 
     // EEPROM
     void saveCalibrationToEEPROM();
@@ -49,25 +70,19 @@ public:
     float readPressure(const String& unit = "bar");
     float readSmoothedPressure(int samples = 10, const String& unit = "bar");
 
-    // v1.1.0: EMA smoothing
+    // Smoothing
     void enableEMASmoothing(bool enabled, float alpha = 0.2);
     float readPressureEMA(const String& unit = "bar");
-
-    // v1.2.0: Unified smoothing strategy
     void setSmoothingMode(SmoothingMode mode);
     float readPressureSmoothed(const String& unit = "bar");
 
-    // v1.2.0: Status + struct-based reading
+    // Diagnostics
     SensorStatus getSensorStatus();
     PressureData getReading(const String& unit = "bar");
-
-    // v1.1.0: Diagnostics & debug
     bool isClamped();
     float getLastVoltage();
     float getLastPressure();
     void enableDebug(bool on);
-
-    // Diagnostics
     bool isPressureOutOfRange();
     bool isSensorConnected();
     float getSupplyVoltage();
@@ -86,7 +101,6 @@ private:
     float _vMin, _vMax;
     float _pMin, _pMax;
 
-    // v1.1.0
     bool _debugEnabled;
     bool _clampedLastRead;
     bool _emaEnabled;
@@ -95,7 +109,6 @@ private:
     float _lastVoltage;
     float _lastPressure;
 
-    // v1.2.0
     SmoothingMode _smoothingMode = SMOOTH_NONE;
 
     float _voltageToPressure(float voltage);

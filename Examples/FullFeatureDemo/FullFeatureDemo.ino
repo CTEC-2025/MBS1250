@@ -4,8 +4,8 @@ MBS1250 sensor(A0, 5.0);  // Analog pin A0, 5V reference
 
 void setup() {
   Serial.begin(9600);
-  delay(500);
-  Serial.println(F("MBS1250 Full Feature Demo – v1.2.0"));
+  delay(100);
+  Serial.println(F("MBS1250 Full Feature Demo – v1.2.5"));
 
   sensor.begin();
 
@@ -15,11 +15,11 @@ void setup() {
   // Enable Debug Mode
   sensor.enableDebug(true);
 
-  // Set smoothing mode (choose one!)
+  // Set unified smoothing mode (choose one!)
   sensor.setSmoothingMode(SMOOTH_EMA); // Options: SMOOTH_NONE, SMOOTH_AVERAGE, SMOOTH_EMA
 
-  // Optional: enable EMA smoothing parameters separately (legacy)
-  sensor.enableEMASmoothing(true, 0.15);
+  // (Optional: direct EMA legacy smoothing setup)
+  // sensor.enableEMASmoothing(true, 0.15);
 }
 
 void loop() {
@@ -34,11 +34,11 @@ void loop() {
   PressureData data = sensor.getReading("bar");
   Serial.print(F("Raw Voltage: "));
   Serial.print(data.voltage, 3);
-  Serial.println(" V");
+  Serial.println(F(" V"));
 
   Serial.print(F("Pressure: "));
   Serial.print(data.pressure, 2);
-  Serial.println(" bar");
+  Serial.println(F(" bar"));
 
   Serial.print(F("Sensor Connected: "));
   Serial.println(data.connected ? "YES" : "NO");
@@ -51,19 +51,19 @@ void loop() {
   Serial.print(F("Sensor Status: "));
   switch (status) {
     case SENSOR_OK:
-      Serial.println("OK");
+      Serial.println(F("OK"));
       break;
     case SENSOR_DISCONNECTED:
-      Serial.println("DISCONNECTED");
+      Serial.println(F("DISCONNECTED"));
       break;
     case SENSOR_CLAMPED:
-      Serial.println("CLAMPED");
+      Serial.println(F("CLAMPED"));
       break;
     case SENSOR_OUT_OF_RANGE:
-      Serial.println("OUT OF RANGE");
+      Serial.println(F("OUT OF RANGE"));
       break;
     default:
-      Serial.println("UNKNOWN");
+      Serial.println(F("UNKNOWN"));
       break;
   }
 

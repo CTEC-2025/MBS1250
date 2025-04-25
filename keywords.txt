@@ -30,3 +30,17 @@ setSmoothingMode          KEYWORD2
 readPressureSmoothed      KEYWORD2
 getSensorStatus           KEYWORD2
 getReading                KEYWORD2
+
+# Enums and Structs
+SensorStatus              LITERAL1
+SENSOR_OK                 LITERAL1
+SENSOR_DISCONNECTED       LITERAL1
+SENSOR_CLAMPED            LITERAL1
+SENSOR_OUT_OF_RANGE       LITERAL1
+
+SmoothingMode             LITERAL1
+SMOOTH_NONE               LITERAL1
+SMOOTH_AVERAGE            LITERAL1
+SMOOTH_EMA                LITERAL1
+
+PressureData              LITERAL1
