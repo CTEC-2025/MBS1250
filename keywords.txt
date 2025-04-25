@@ -1,37 +1,42 @@
+#######################################
+# MBS1250 Library Keywords v1.3.0
+#######################################
+
 MBS1250                   KEYWORD1
+
 begin                     KEYWORD2
 readVoltage               KEYWORD2
 readPressure              KEYWORD2
 readRawPressure           KEYWORD2
 readSmoothedPressure      KEYWORD2
 enableClamping            KEYWORD2
+enableAutoZero            KEYWORD2   # NEW v1.3.0
 setZeroOffset             KEYWORD2
 setCalibration            KEYWORD2
 resetCalibration          KEYWORD2
+printCalibration          KEYWORD2
 saveCalibrationToEEPROM   KEYWORD2
 loadCalibrationFromEEPROM KEYWORD2
-isPressureOutOfRange      KEYWORD2
-isSensorConnected         KEYWORD2
-getSupplyVoltage          KEYWORD2
-getPressureMin            KEYWORD2
-getPressureMax            KEYWORD2
-getVoltageMin             KEYWORD2
-getVoltageMax             KEYWORD2
 enableEMASmoothing        KEYWORD2
+setSmoothingMode          KEYWORD2
 readPressureEMA           KEYWORD2
+readPressureSmoothed      KEYWORD2
+
+getSensorStatus           KEYWORD2
+getReading                KEYWORD2
 isClamped                 KEYWORD2
 getLastVoltage            KEYWORD2
 getLastPressure           KEYWORD2
 enableDebug               KEYWORD2
+isPressureOutOfRange      KEYWORD2
+isSensorConnected         KEYWORD2
+getSupplyVoltage          KEYWORD2
 
-# v1.2.0 additions
-printCalibration          KEYWORD2
-setSmoothingMode          KEYWORD2
-readPressureSmoothed      KEYWORD2
-getSensorStatus           KEYWORD2
-getReading                KEYWORD2
+getPressureMin            KEYWORD2
+getPressureMax            KEYWORD2
+getVoltageMin             KEYWORD2
+getVoltageMax             KEYWORD2
 
-# Enums and Structs
 SensorStatus              LITERAL1
 SENSOR_OK                 LITERAL1
 SENSOR_DISCONNECTED       LITERAL1

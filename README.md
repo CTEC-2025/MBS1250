@@ -1,12 +1,14 @@
 # MBS1250 Arduino Library
 
-### 🆕 What's New in v1.2.5
+### 🆕 What's New in v1.3.0
+- 🛫 **Auto-Zero on Startup**:  
+  Use `enableAutoZero(true)` to automatically zero the sensor during `begin()`, perfect for offset drift removal at power-up.  
+- 🌎 **Expanded Pressure Unit Support**:  
+  Now supports `"bar"`, `"psi"`, `"kPa"`, `"atm"`, and `"mmHg"` outputs in all pressure reading functions.
+- 🧹 **Internal Improvements**:  
+  Cleaner codebase, unified pressure unit conversion helper.
 
-- 🧹 **Code Cleanup & Polishing**: Internal code improvements and organization.
-- 📋 **Sensor Health Monitoring**: `getSensorStatus()` reports if the sensor is OK, clamped, out-of-range, or disconnected.
-- 📦 **Pressure Data Struct**: `getReading()` returns full sensor snapshot (pressure, voltage, connected, clamped).
-- 🎚 **Unified Smoothing Mode**: Select NONE, AVERAGE, or EMA smoothing using `setSmoothingMode()`.
-- 🛠 **Calibration Display**: `printCalibration()` prints current calibration ranges.
+---
 
 ## Function Reference
 
@@ -15,7 +17,7 @@
 | `begin()`                         | Initializes the sensor and performs board-specific checks.      |
 | `readVoltage()`                   | Returns clamped sensor voltage in volts (based on calibration). |
 | `readRawPressure()`               | Returns raw pressure calculated from the sensor voltage.        |
-| `readPressure(unit)`              | Returns pressure in the requested unit ("bar", "psi", "kPa").   |
+| `readPressure(unit)`              | Returns pressure in requested unit ("bar", "psi", "kPa", "atm", "mmHg"). |
 | `readSmoothedPressure(n, unit)`   | Averages multiple pressure readings for noise reduction.        |
 | `setZeroOffset(offsetBar)`        | Adjusts the baseline pressure reading.                          |
 | `setCalibration(vMin, vMax, pMin, pMax)` | Sets a custom calibration mapping.                       |
@@ -38,24 +40,46 @@
 | `readPressureSmoothed(unit)`       | Reads pressure with selected smoothing mode           |
 | `getSensorStatus()`                | Returns sensor status (OK, clamped, disconnected, etc.) |
 | `getReading(unit)`                 | Returns full structured snapshot of sensor values     |
+| `enableAutoZero(on)`              | Enables/disables auto-zeroing on startup. (v1.3.0)              |
 
-### Supported Hardware
+---
 
-| Platform							| Notes
-|-----------------------------------|-----------------------------------------------------------------
-| Arduino Uno/Nano					| Fully Supported, Including getSupplyVoltage()
-| ESP32/ESP8266						| Fully Supported Except For Supply Voltage
-| Other Boards						| Works If analogRead() is Supported
+### Supported Units for Pressure Readings
+| Unit  | Description                   |
+|:------|:------------------------------|
+| bar   | Standard output (default)      |
+| psi   | Pounds per square inch         |
+| kPa   | Kilopascals                    |
+| atm   | Atmospheres                    |
+| mmHg  | Millimeters of mercury (Torr)  |
 
+---
 
 ## 📦 Installation
 
-### Option 1: Library Manager (coming soon)
-- Open the Arduino IDE
+### Option 1: Arduino Library Manager
+- Open the Arduino IDE.
 - Go to **Tools > Manage Libraries...**
-- Search for `MBS1250` and click Install
+- Search for `MBS1250` and click Install.
 
-### Option 2: Manual
-- Download this repository as a `.zip`
-- Go to **Sketch > Include Library > Add .ZIP Library...**
-- Select the downloaded archive
+### Option 2: Manual Installation
+- Download this repository as a `.zip`.
+- Go to **Sketch > Include Library > Add .ZIP Library...**.
+- Select the downloaded archive.
+
+---
+
+## 📚 Examples Included
+
+| Example Sketch         | Description                                   |
+|-------------------------|-----------------------------------------------|
+| BasicRead               | Quick start with default settings.           |
+| AdvancedRead            | Read voltage, pressure, and unit conversions.|
+| SmoothedDiagnostics     | Averaged readings with fault detection.       |
+| CalibrationEEPROM       | Save/load custom calibration to EEPROM.      |
+| FullFeatureDemo         | Full showcase with smoothing and status.     |
+
+---
+
+🛠 Built for robust real-world projects.  
+Now featuring **auto-zero** and **expanded unit flexibility**! 🚀

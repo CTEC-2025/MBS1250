@@ -3,13 +3,8 @@
 /*
  * MBS1250 Pressure Sensor Library
  * --------------------------------
- * Version: 1.2.5
- * Author: [CTEC-2025]
- *
- * Description:
- * Main source file for MBS1250 sensor library. Provides functionality 
- * for voltage-to-pressure conversion, smoothing, calibration, 
- * diagnostics, and EEPROM support.
+ * Version: 1.3.0
+ * Author: CTEC 2025
  */
 
 // EEPROM storage struct (internal use)
@@ -36,6 +31,7 @@ MBS1250::MBS1250(uint8_t pin, float vRef)
     _emaPressure(0.0),
     _lastVoltage(0.0),
     _lastPressure(0.0),
+    _autoZeroEnabled(false),
     _smoothingMode(SMOOTH_NONE) {}
 
 void MBS1250::begin() {
@@ -46,6 +42,15 @@ void MBS1250::begin() {
         Serial.println(" may not be a valid analog input on Uno/Nano.");
     }
 #endif
+
+    if (_autoZeroEnabled) {
+        float initialPressure = _voltageToPressure(readVoltage());
+        setZeroOffset(-initialPressure);
+        if (_debugEnabled) {
+            Serial.print("[MBS1250] Auto-zero applied. Offset: ");
+            Serial.println(_zeroOffset, 3);
+        }
+    }
 }
 
 // -----------------------------
@@ -57,6 +62,10 @@ void MBS1250::enableClamping(bool on) {
 
 void MBS1250::setZeroOffset(float offsetBar) {
     _zeroOffset = offsetBar;
+}
+
+void MBS1250::enableAutoZero(bool on) {
+    _autoZeroEnabled = on;
 }
 
 void MBS1250::setCalibration(float vMin, float vMax, float pMin, float pMax) {
@@ -146,9 +155,7 @@ float MBS1250::readPressure(const String& unit) {
     float pressureBar = _voltageToPressure(readVoltage()) + _zeroOffset;
     _lastPressure = pressureBar;
 
-    if (unit == "psi") return pressureBar * 14.5038;
-    if (unit == "kPa") return pressureBar * 100.0;
-    return pressureBar;
+    return _convertPressureUnit(pressureBar, unit);
 }
 
 float MBS1250::readSmoothedPressure(int samples, const String& unit) {
@@ -164,11 +171,15 @@ float MBS1250::readSmoothedPressure(int samples, const String& unit) {
 }
 
 // -----------------------------
-// EMA Smoothing
+// Smoothing
 // -----------------------------
 void MBS1250::enableEMASmoothing(bool enabled, float alpha) {
     _emaEnabled = enabled;
     _emaAlpha = constrain(alpha, 0.01, 0.99);
+}
+
+void MBS1250::setSmoothingMode(SmoothingMode mode) {
+    _smoothingMode = mode;
 }
 
 float MBS1250::readPressureEMA(const String& unit) {
@@ -186,16 +197,7 @@ float MBS1250::readPressureEMA(const String& unit) {
         Serial.println(_emaPressure, 3);
     }
 
-    if (unit == "psi") return _emaPressure * 14.5038;
-    if (unit == "kPa") return _emaPressure * 100.0;
-    return _emaPressure;
-}
-
-// -----------------------------
-// Unified Smoothing Mode
-// -----------------------------
-void MBS1250::setSmoothingMode(SmoothingMode mode) {
-    _smoothingMode = mode;
+    return _convertPressureUnit(_emaPressure, unit);
 }
 
 float MBS1250::readPressureSmoothed(const String& unit) {
@@ -211,7 +213,7 @@ float MBS1250::readPressureSmoothed(const String& unit) {
 }
 
 // -----------------------------
-// Sensor Status & Struct-based Reading
+// Sensor Status & Reading Struct
 // -----------------------------
 SensorStatus MBS1250::getSensorStatus() {
     if (!isSensorConnected()) return SENSOR_DISCONNECTED;
@@ -227,11 +229,10 @@ PressureData MBS1250::getReading(const String& unit) {
     data.connected = isSensorConnected();
     data.clamped = _clampedLastRead;
 
-    if (unit == "psi") data.pressure *= 14.5038;
-    if (unit == "kPa") data.pressure *= 100.0;
-
     _lastPressure = data.pressure;
     _lastVoltage = data.voltage;
+
+    data.pressure = _convertPressureUnit(data.pressure, unit);
 
     return data;
 }
@@ -278,8 +279,16 @@ float MBS1250::getSupplyVoltage() {
 }
 
 // -----------------------------
-// Internal Helper
+// Private Helpers
 // -----------------------------
 float MBS1250::_voltageToPressure(float voltage) {
     return (voltage - _vMin) * ((_pMax - _pMin) / (_vMax - _vMin)) + _pMin;
+}
+
+float MBS1250::_convertPressureUnit(float pressureBar, const String& unit) {
+    if (unit == "psi") return pressureBar * 14.5038;
+    if (unit == "kPa") return pressureBar * 100.0;
+    if (unit == "atm") return pressureBar * 0.986923;
+    if (unit == "mmHg") return pressureBar * 750.062;
+    return pressureBar; // Default is bar
 }
