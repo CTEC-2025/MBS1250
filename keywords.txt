@@ -1,5 +1,5 @@
 #######################################
-# MBS1250 Library Keywords v1.3.0
+# MBS1250 Library Keywords v1.4.0
 #######################################
 
 MBS1250                   KEYWORD1
@@ -10,7 +10,7 @@ readPressure              KEYWORD2
 readRawPressure           KEYWORD2
 readSmoothedPressure      KEYWORD2
 enableClamping            KEYWORD2
-enableAutoZero            KEYWORD2   # NEW v1.3.0
+enableAutoZero            KEYWORD2
 setZeroOffset             KEYWORD2
 setCalibration            KEYWORD2
 resetCalibration          KEYWORD2
@@ -36,6 +36,12 @@ getPressureMin            KEYWORD2
 getPressureMax            KEYWORD2
 getVoltageMin             KEYWORD2
 getVoltageMax             KEYWORD2
+
+# New v1.4.0 Features
+getPressureRate           KEYWORD2
+getPeakPressure           KEYWORD2
+getLowestPressure         KEYWORD2
+resetPeakHold             KEYWORD2
 
 SensorStatus              LITERAL1
 SENSOR_OK                 LITERAL1

@@ -1,12 +1,17 @@
 # MBS1250 Arduino Library
 
-### 🆕 What's New in v1.3.0
-- 🛫 **Auto-Zero on Startup**:  
-  Use `enableAutoZero(true)` to automatically zero the sensor during `begin()`, perfect for offset drift removal at power-up.  
-- 🌎 **Expanded Pressure Unit Support**:  
-  Now supports `"bar"`, `"psi"`, `"kPa"`, `"atm"`, and `"mmHg"` outputs in all pressure reading functions.
-- 🧹 **Internal Improvements**:  
-  Cleaner codebase, unified pressure unit conversion helper.
+### 🆕 What's New in v1.4.0
+- 📈 **Pressure Rate of Change Calculation**:  
+  New `getPressureRate()` method lets you monitor how quickly pressure rises or falls (in bar/sec, psi/sec, etc.).
+  
+- 🏔️ **Peak and Lowest Pressure Tracking**:  
+  - `getPeakPressure()` returns the highest recorded pressure.
+  - `getLowestPressure()` returns the lowest recorded pressure.
+  - `resetPeakHold()` resets the peak and low memory.
+
+- 🛹 **Internal Improvements**:  
+  - Smoother tracking of live pressure changes.
+  - Core ready for even more advanced features in future versions!
 
 ---
 
@@ -15,56 +20,61 @@
 | Method                            | Description                                                     |
 |-----------------------------------|-----------------------------------------------------------------|
 | `begin()`                         | Initializes the sensor and performs board-specific checks.      |
-| `readVoltage()`                   | Returns clamped sensor voltage in volts (based on calibration). |
-| `readRawPressure()`               | Returns raw pressure calculated from the sensor voltage.        |
+| `enableAutoZero(on)`              | Enables/disables auto-zeroing on startup.                        |
+| `readVoltage()`                   | Returns clamped sensor voltage (in volts).                       |
+| `readRawPressure()`               | Returns raw pressure calculated from the sensor voltage.         |
 | `readPressure(unit)`              | Returns pressure in requested unit ("bar", "psi", "kPa", "atm", "mmHg"). |
-| `readSmoothedPressure(n, unit)`   | Averages multiple pressure readings for noise reduction.        |
-| `setZeroOffset(offsetBar)`        | Adjusts the baseline pressure reading.                          |
-| `setCalibration(vMin, vMax, pMin, pMax)` | Sets a custom calibration mapping.                       |
-| `resetCalibration()`              | Resets calibration parameters to default.                       |
-| `saveCalibrationToEEPROM()`       | Store calibration and offset to EEPROM.   |
-| `loadCalibrationFromEEPROM()`      | Load saved calibration and offset from EEPROM. |
-| `isPressureOutOfRange()`          | Checks if the measured voltage is outside calibrated range (with a ±0.05V margin). |
-| `isSensorConnected()`             | Determines if the sensor appears to be properly connected.      |
-| `getSupplyVoltage()`              | Returns the board supply voltage (AVR only).                    |
-| `getPressureMin()/getPressureMax()` | Returns the calibrated pressure range.                        |
-| `getVoltageMin()/getVoltageMax()`   | Returns the calibrated voltage range.                         |
-| `enableEMASmoothing(enabled, alpha)` | Enables EMA smoothing and sets smoothing factor     		  |
-| `readPressureEMA(unit)`              | Returns pressure with EMA filtering applied          		  |
-| `isClamped()`                        | Returns `true` if the last read voltage was clamped  		  |
-| `getLastVoltage()`                  | Returns the most recent sensor voltage               		  |
-| `getLastPressure()`                 | Returns the most recent pressure (in bar)            		  |
-| `enableDebug(true/false)`           | Turns on/off internal debug print statements         		  |
-| `printCalibration()`              | Prints current voltage/pressure calibration values     |
-| `setSmoothingMode(mode)`           | Sets smoothing mode (none, average, EMA)               |
-| `readPressureSmoothed(unit)`       | Reads pressure with selected smoothing mode           |
-| `getSensorStatus()`                | Returns sensor status (OK, clamped, disconnected, etc.) |
-| `getReading(unit)`                 | Returns full structured snapshot of sensor values     |
-| `enableAutoZero(on)`              | Enables/disables auto-zeroing on startup. (v1.3.0)              |
+| `readSmoothedPressure(n, unit)`   | Averages multiple pressure readings for noise reduction.         |
+| `enableClamping(on)`              | Enables voltage clamping within calibration range.               |
+| `setZeroOffset(offsetBar)`        | Adjusts baseline pressure manually.                              |
+| `setCalibration(vMin, vMax, pMin, pMax)` | Sets custom voltage-to-pressure mapping.                   |
+| `resetCalibration()`              | Resets calibration parameters to defaults.                       |
+| `saveCalibrationToEEPROM()`       | Stores calibration and offset into EEPROM.                       |
+| `loadCalibrationFromEEPROM()`     | Loads calibration and offset from EEPROM.                        |
+| `enableEMASmoothing(enabled, alpha)` | Enables EMA smoothing and sets smoothing factor.             |
+| `setSmoothingMode(mode)`          | Sets smoothing mode (NONE, AVERAGE, EMA).                         |
+| `readPressureEMA(unit)`           | Reads pressure using EMA filtering.                               |
+| `readPressureSmoothed(unit)`      | Reads pressure with selected smoothing mode.                      |
+| `getSensorStatus()`               | Returns sensor status (OK, disconnected, clamped, out-of-range).  |
+| `getReading(unit)`                | Returns full structured snapshot of sensor values.                |
+| `isClamped()`                     | Returns `true` if last voltage reading was clamped.                |
+| `getLastVoltage()`                | Returns most recent sensor voltage reading.                       |
+| `getLastPressure()`               | Returns most recent pressure (in bar).                             |
+| `enableDebug(on)`                 | Enables or disables internal debug print statements.              |
+| `isPressureOutOfRange()`          | Checks if voltage is outside calibration range (±0.05V margin).    |
+| `isSensorConnected()`             | Checks if sensor appears properly connected.                      |
+| `getSupplyVoltage()`              | Returns board supply voltage (AVR-only feature).                   |
+| `getPressureMin()/getPressureMax()` | Returns calibrated pressure range.                                |
+| `getVoltageMin()/getVoltageMax()`  | Returns calibrated voltage range.                                 |
+| `getPressureRate()`               | Returns live pressure rate of change (bar/sec, psi/sec, etc.).     |
+| `getPeakPressure()`               | Returns highest pressure recorded.                                |
+| `getLowestPressure()`             | Returns lowest pressure recorded.                                 |
+| `resetPeakHold()`                 | Resets peak and lowest pressure memory.                           |
 
 ---
 
 ### Supported Units for Pressure Readings
+
 | Unit  | Description                   |
 |:------|:------------------------------|
-| bar   | Standard output (default)      |
-| psi   | Pounds per square inch         |
-| kPa   | Kilopascals                    |
-| atm   | Atmospheres                    |
-| mmHg  | Millimeters of mercury (Torr)  |
+| bar   | Standard output (default).     |
+| psi   | Pounds per square inch.        |
+| kPa   | Kilopascals.                   |
+| atm   | Atmospheres.                   |
+| mmHg  | Millimeters of mercury (Torr). |
 
 ---
 
 ## 📦 Installation
 
-### Option 1: Arduino Library Manager
+### Option 1: Arduino Library Manager (in progress)
 - Open the Arduino IDE.
 - Go to **Tools > Manage Libraries...**
 - Search for `MBS1250` and click Install.
 
 ### Option 2: Manual Installation
 - Download this repository as a `.zip`.
-- Go to **Sketch > Include Library > Add .ZIP Library...**.
+- Go to **Sketch > Include Library > Add .ZIP Library...**
 - Select the downloaded archive.
 
 ---
@@ -81,5 +91,5 @@
 
 ---
 
-🛠 Built for robust real-world projects.  
-Now featuring **auto-zero** and **expanded unit flexibility**! 🚀
+🛠 Built for real-world projects.  
+Now featuring **auto-zero**, **expanded unit support**, **pressure rate tracking**, and **peak pressure memory**! 🚀

@@ -3,7 +3,7 @@
 /*
  * MBS1250 Pressure Sensor Library
  * --------------------------------
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: CTEC 2025
  */
 
@@ -32,6 +32,10 @@ MBS1250::MBS1250(uint8_t pin, float vRef)
     _lastVoltage(0.0),
     _lastPressure(0.0),
     _autoZeroEnabled(false),
+    _previousPressure(0.0),
+    _previousTime(0),
+    _peakPressure(-9999.0),
+    _lowestPressure(9999.0),
     _smoothingMode(SMOOTH_NONE) {}
 
 void MBS1250::begin() {
@@ -51,6 +55,11 @@ void MBS1250::begin() {
             Serial.println(_zeroOffset, 3);
         }
     }
+
+    _previousPressure = 0.0;
+    _previousTime = millis();
+    _peakPressure = -9999.0;
+    _lowestPressure = 9999.0;
 }
 
 // -----------------------------
@@ -60,12 +69,12 @@ void MBS1250::enableClamping(bool on) {
     _clampEnabled = on;
 }
 
-void MBS1250::setZeroOffset(float offsetBar) {
-    _zeroOffset = offsetBar;
-}
-
 void MBS1250::enableAutoZero(bool on) {
     _autoZeroEnabled = on;
+}
+
+void MBS1250::setZeroOffset(float offsetBar) {
+    _zeroOffset = offsetBar;
 }
 
 void MBS1250::setCalibration(float vMin, float vMax, float pMin, float pMax) {
@@ -154,6 +163,16 @@ float MBS1250::readRawPressure() {
 float MBS1250::readPressure(const String& unit) {
     float pressureBar = _voltageToPressure(readVoltage()) + _zeroOffset;
     _lastPressure = pressureBar;
+
+    unsigned long currentTime = millis();
+    unsigned long deltaTime = currentTime - _previousTime;
+    if (deltaTime > 0) {
+        _previousTime = currentTime;
+        _previousPressure = pressureBar;
+    }
+
+    if (pressureBar > _peakPressure) _peakPressure = pressureBar;
+    if (pressureBar < _lowestPressure) _lowestPressure = pressureBar;
 
     return _convertPressureUnit(pressureBar, unit);
 }
@@ -276,6 +295,29 @@ float MBS1250::getSupplyVoltage() {
 #else
     return -1.0;
 #endif
+}
+
+// -----------------------------
+// v1.4.0 New Features
+// -----------------------------
+float MBS1250::getPressureRate() {
+    unsigned long now = millis();
+    float timeDiffSec = (now - _previousTime) / 1000.0;
+    if (timeDiffSec == 0) return 0.0;
+    return (_lastPressure - _previousPressure) / timeDiffSec;
+}
+
+float MBS1250::getPeakPressure() {
+    return _peakPressure;
+}
+
+float MBS1250::getLowestPressure() {
+    return _lowestPressure;
+}
+
+void MBS1250::resetPeakHold() {
+    _peakPressure = -9999.0;
+    _lowestPressure = 9999.0;
 }
 
 // -----------------------------

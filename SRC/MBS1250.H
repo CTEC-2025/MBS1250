@@ -7,13 +7,12 @@
 /*
  * MBS1250 Pressure Sensor Library
  * --------------------------------
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: CTEC 2025
  *
  * Description:
  * Flexible library for reading, smoothing, and diagnosing 
- * MBS1250 pressure sensors with added auto-zeroing and 
- * expanded unit support.
+ * MBS1250 pressure sensors with new pressure rate and peak tracking features.
  *
  * Change History:
  * - v1.0.0: Initial stable release.
@@ -21,6 +20,7 @@
  * - v1.2.0: Sensor health status, smoothing modes, struct-based reading.
  * - v1.2.5: Code cleanup, documentation polish.
  * - v1.3.0: Auto-zero on startup, expanded pressure unit support.
+ * - v1.4.0: Pressure rate, peak/lowest pressure tracking.
  */
 
 // Sensor health states
@@ -54,11 +54,11 @@ public:
 
     // Configuration
     void enableClamping(bool on);
+    void enableAutoZero(bool on);
     void setZeroOffset(float offsetBar);
     void setCalibration(float vMin, float vMax, float pMin, float pMax);
     void resetCalibration();
     void printCalibration();
-    void enableAutoZero(bool on); // v1.3.0
 
     // EEPROM
     void saveCalibrationToEEPROM();
@@ -93,6 +93,12 @@ public:
     float getVoltageMin();
     float getVoltageMax();
 
+    // v1.4.0 New Features
+    float getPressureRate();       // Return pressure rate (bar/sec or unit/sec)
+    float getPeakPressure();       // Highest pressure recorded
+    float getLowestPressure();     // Lowest pressure recorded
+    void resetPeakHold();          // Reset peak and lowest values
+
 private:
     uint8_t _pin;
     float _vRef;
@@ -109,11 +115,18 @@ private:
     float _lastVoltage;
     float _lastPressure;
 
-    bool _autoZeroEnabled; // v1.3.0 auto-zero support
+    bool _autoZeroEnabled;
     SmoothingMode _smoothingMode = SMOOTH_NONE;
 
+    // v1.4.0 New Private Variables
+    float _previousPressure;
+    unsigned long _previousTime;
+    float _peakPressure;
+    float _lowestPressure;
+
+    // Helpers
     float _voltageToPressure(float voltage);
-    float _convertPressureUnit(float pressureBar, const String& unit); // v1.3.0
+    float _convertPressureUnit(float pressureBar, const String& unit);
 };
 
 #endif  // MBS1250_H
