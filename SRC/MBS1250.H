@@ -7,12 +7,13 @@
 /*
  * MBS1250 Pressure Sensor Library
  * --------------------------------
- * Version: 1.4.0
+ * Version: 1.5.0
  * Author: CTEC 2025
  *
  * Description:
- * Flexible library for reading, smoothing, and diagnosing 
- * MBS1250 pressure sensors with new pressure rate and peak tracking features.
+ * Flexible library for MBS1250 pressure sensors with full support for 
+ * smoothing, calibration, pressure stability detection, alarms, and 
+ * multiple sensor handling.
  *
  * Change History:
  * - v1.0.0: Initial stable release.
@@ -21,6 +22,7 @@
  * - v1.2.5: Code cleanup, documentation polish.
  * - v1.3.0: Auto-zero on startup, expanded pressure unit support.
  * - v1.4.0: Pressure rate, peak/lowest pressure tracking.
+ * - v1.5.0: Pressure alarms, stability detection, multiple sensor ready.
  */
 
 // Sensor health states
@@ -93,11 +95,22 @@ public:
     float getVoltageMin();
     float getVoltageMax();
 
-    // v1.4.0 New Features
-    float getPressureRate();       // Return pressure rate (bar/sec or unit/sec)
-    float getPeakPressure();       // Highest pressure recorded
-    float getLowestPressure();     // Lowest pressure recorded
-    void resetPeakHold();          // Reset peak and lowest values
+    // v1.4.0 Features
+    float getPressureRate();
+    float getPeakPressure();
+    float getLowestPressure();
+    void resetPeakHold();
+
+    // v1.5.0 Features: Pressure Alarms
+    void setHighPressureAlarm(float pressure, const String& unit = "bar");
+    void setLowPressureAlarm(float pressure, const String& unit = "bar");
+    void clearPressureAlarms();
+    bool isHighPressureAlarmTriggered();
+    bool isLowPressureAlarmTriggered();
+    void onAlarmTriggered(void (*callback)());
+
+    // v1.5.0 Features: Pressure Stability
+    bool isPressureStable(unsigned long stableTimeMs = 3000, float threshold = 0.05);
 
 private:
     uint8_t _pin;
@@ -118,11 +131,21 @@ private:
     bool _autoZeroEnabled;
     SmoothingMode _smoothingMode = SMOOTH_NONE;
 
-    // v1.4.0 New Private Variables
     float _previousPressure;
     unsigned long _previousTime;
     float _peakPressure;
     float _lowestPressure;
+
+    // v1.5.0 Private Variables: Alarms
+    float _highPressureAlarm;
+    float _lowPressureAlarm;
+    bool _highAlarmTriggered;
+    bool _lowAlarmTriggered;
+    void (*_alarmCallback)();
+
+    // v1.5.0 Private Variables: Stability
+    float _stableLastPressure;
+    unsigned long _stableLastChangeTime;
 
     // Helpers
     float _voltageToPressure(float voltage);

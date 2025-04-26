@@ -3,11 +3,11 @@
 /*
  * MBS1250 Pressure Sensor Library
  * --------------------------------
- * Version: 1.4.0
+ * Version: 1.5.0
  * Author: CTEC 2025
  */
 
-// EEPROM storage struct (internal use)
+// EEPROM storage struct
 struct MBS1250Config {
     float vMin, vMax;
     float pMin, pMax;
@@ -36,6 +36,13 @@ MBS1250::MBS1250(uint8_t pin, float vRef)
     _previousTime(0),
     _peakPressure(-9999.0),
     _lowestPressure(9999.0),
+    _highPressureAlarm(-1.0),
+    _lowPressureAlarm(-1.0),
+    _highAlarmTriggered(false),
+    _lowAlarmTriggered(false),
+    _alarmCallback(nullptr),
+    _stableLastPressure(0.0),
+    _stableLastChangeTime(0),
     _smoothingMode(SMOOTH_NONE) {}
 
 void MBS1250::begin() {
@@ -60,6 +67,15 @@ void MBS1250::begin() {
     _previousTime = millis();
     _peakPressure = -9999.0;
     _lowestPressure = 9999.0;
+
+    _highPressureAlarm = -1.0;
+    _lowPressureAlarm = -1.0;
+    _highAlarmTriggered = false;
+    _lowAlarmTriggered = false;
+    _alarmCallback = nullptr;
+
+    _stableLastPressure = 0.0;
+    _stableLastChangeTime = millis();
 }
 
 // -----------------------------
@@ -174,6 +190,27 @@ float MBS1250::readPressure(const String& unit) {
     if (pressureBar > _peakPressure) _peakPressure = pressureBar;
     if (pressureBar < _lowestPressure) _lowestPressure = pressureBar;
 
+    // --- Alarms ---
+    if (_highPressureAlarm > 0 && pressureBar >= _highPressureAlarm) {
+        if (!_highAlarmTriggered) {
+            _highAlarmTriggered = true;
+            if (_alarmCallback != nullptr) _alarmCallback();
+        }
+    }
+
+    if (_lowPressureAlarm > 0 && pressureBar <= _lowPressureAlarm) {
+        if (!_lowAlarmTriggered) {
+            _lowAlarmTriggered = true;
+            if (_alarmCallback != nullptr) _alarmCallback();
+        }
+    }
+
+    // --- Stability ---
+    if (abs(pressureBar - _stableLastPressure) > 0.02) {
+        _stableLastChangeTime = currentTime;
+        _stableLastPressure = pressureBar;
+    }
+
     return _convertPressureUnit(pressureBar, unit);
 }
 
@@ -232,7 +269,7 @@ float MBS1250::readPressureSmoothed(const String& unit) {
 }
 
 // -----------------------------
-// Sensor Status & Reading Struct
+// Diagnostics and Reading Struct
 // -----------------------------
 SensorStatus MBS1250::getSensorStatus() {
     if (!isSensorConnected()) return SENSOR_DISCONNECTED;
@@ -256,9 +293,6 @@ PressureData MBS1250::getReading(const String& unit) {
     return data;
 }
 
-// -----------------------------
-// Diagnostics
-// -----------------------------
 bool MBS1250::isClamped() {
     return _clampedLastRead;
 }
@@ -298,7 +332,7 @@ float MBS1250::getSupplyVoltage() {
 }
 
 // -----------------------------
-// v1.4.0 New Features
+// v1.4.0 Features
 // -----------------------------
 float MBS1250::getPressureRate() {
     unsigned long now = millis();
@@ -318,6 +352,49 @@ float MBS1250::getLowestPressure() {
 void MBS1250::resetPeakHold() {
     _peakPressure = -9999.0;
     _lowestPressure = 9999.0;
+}
+
+// -----------------------------
+// v1.5.0 Features
+// -----------------------------
+void MBS1250::setHighPressureAlarm(float pressure, const String& unit) {
+    _highPressureAlarm = pressure;
+    if (unit != "bar") _highPressureAlarm = pressure / _convertPressureUnit(1.0, unit);
+    _highAlarmTriggered = false;
+}
+
+void MBS1250::setLowPressureAlarm(float pressure, const String& unit) {
+    _lowPressureAlarm = pressure;
+    if (unit != "bar") _lowPressureAlarm = pressure / _convertPressureUnit(1.0, unit);
+    _lowAlarmTriggered = false;
+}
+
+void MBS1250::clearPressureAlarms() {
+    _highPressureAlarm = -1.0;
+    _lowPressureAlarm = -1.0;
+    _highAlarmTriggered = false;
+    _lowAlarmTriggered = false;
+}
+
+bool MBS1250::isHighPressureAlarmTriggered() {
+    return _highAlarmTriggered;
+}
+
+bool MBS1250::isLowPressureAlarmTriggered() {
+    return _lowAlarmTriggered;
+}
+
+void MBS1250::onAlarmTriggered(void (*callback)()) {
+    _alarmCallback = callback;
+}
+
+bool MBS1250::isPressureStable(unsigned long stableTimeMs, float threshold) {
+    unsigned long now = millis();
+    float delta = abs(_lastPressure - _stableLastPressure);
+    if (delta <= threshold && (now - _stableLastChangeTime) >= stableTimeMs) {
+        return true;
+    }
+    return false;
 }
 
 // -----------------------------

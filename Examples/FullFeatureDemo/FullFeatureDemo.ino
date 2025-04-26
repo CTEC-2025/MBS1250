@@ -2,10 +2,15 @@
 
 MBS1250 sensor(A0, 5.0);  // Analog pin A0, 5V reference
 
+// Alarm callback function
+void alarmTriggered() {
+  Serial.println(F("⚠️ Alarm Triggered! (High or Low Pressure)"));
+}
+
 void setup() {
   Serial.begin(9600);
   delay(100);
-  Serial.println(F("MBS1250 Full Feature Demo – v1.4.0"));
+  Serial.println(F("MBS1250 Full Feature Demo – v1.5.0"));
 
   sensor.begin();
 
@@ -18,8 +23,12 @@ void setup() {
   // Set smoothing mode (choose one!)
   sensor.setSmoothingMode(SMOOTH_EMA); // Options: SMOOTH_NONE, SMOOTH_AVERAGE, SMOOTH_EMA
 
-  // (Optional: direct EMA smoothing setup legacy style)
-  // sensor.enableEMASmoothing(true, 0.15);
+  // Setup pressure alarms
+  sensor.setHighPressureAlarm(8.0, "bar"); // Trigger if pressure >= 8 bar
+  sensor.setLowPressureAlarm(1.0, "bar");  // Trigger if pressure <= 1 bar
+
+  // Register a callback function when alarm is triggered
+  sensor.onAlarmTriggered(alarmTriggered);
 }
 
 void loop() {
@@ -74,7 +83,7 @@ void loop() {
       break;
   }
 
-  // New v1.4.0 Features
+  // v1.4.0 Features
   Serial.print(F("Pressure Rate (bar/sec): "));
   Serial.println(sensor.getPressureRate(), 3);
 
@@ -85,6 +94,20 @@ void loop() {
   Serial.print(F("Lowest Pressure Recorded: "));
   Serial.print(sensor.getLowestPressure(), 2);
   Serial.println(F(" bar"));
+
+  // v1.5.0 Features
+  if (sensor.isHighPressureAlarmTriggered()) {
+    Serial.println(F("🚨 High Pressure Alarm ACTIVE!"));
+  }
+  if (sensor.isLowPressureAlarmTriggered()) {
+    Serial.println(F("🚨 Low Pressure Alarm ACTIVE!"));
+  }
+
+  if (sensor.isPressureStable(3000, 0.05)) {
+    Serial.println(F("✅ Pressure is Stable."));
+  } else {
+    Serial.println(F("🔄 Pressure is Changing..."));
+  }
 
   delay(1500);
 }

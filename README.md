@@ -1,17 +1,17 @@
 # MBS1250 Arduino Library
 
-### 🆕 What's New in v1.4.0
-- 📈 **Pressure Rate of Change Calculation**:  
-  New `getPressureRate()` method lets you monitor how quickly pressure rises or falls (in bar/sec, psi/sec, etc.).
-  
-- 🏔️ **Peak and Lowest Pressure Tracking**:  
-  - `getPeakPressure()` returns the highest recorded pressure.
-  - `getLowestPressure()` returns the lowest recorded pressure.
-  - `resetPeakHold()` resets the peak and low memory.
+### 🆕 What's New in v1.5.0
+- 🚨 **Pressure Alarms (High/Low Setpoints)**:  
+  Trigger warnings if pressure goes too high or too low. Optional callback support for custom alarms!
+
+- 🧘 **Pressure Stability Detection**:  
+  Detects when pressure becomes steady (no significant changes for a set time).
+
+- 🔥 **Multiple Sensor Support Ready**:  
+  You can now run multiple MBS1250 sensors at once without conflicts.
 
 - 🛹 **Internal Improvements**:  
-  - Smoother tracking of live pressure changes.
-  - Core ready for even more advanced features in future versions!
+  Improved pressure tracking, alarms, and stability logic.
 
 ---
 
@@ -50,10 +50,17 @@
 | `getPeakPressure()`               | Returns highest pressure recorded.                                |
 | `getLowestPressure()`             | Returns lowest pressure recorded.                                 |
 | `resetPeakHold()`                 | Resets peak and lowest pressure memory.                           |
+| `setHighPressureAlarm(pressure, unit)` | Sets a high pressure alarm.                                 |
+| `setLowPressureAlarm(pressure, unit)` | Sets a low pressure alarm.                                   |
+| `clearPressureAlarms()`           | Clears all active alarms.                                         |
+| `isHighPressureAlarmTriggered()`  | Returns `true` if the high alarm triggered.                       |
+| `isLowPressureAlarmTriggered()`   | Returns `true` if the low alarm triggered.                        |
+| `onAlarmTriggered(callback)`      | Sets a callback function to call when an alarm triggers.          |
+| `isPressureStable(stableTimeMs, threshold)` | Detects if pressure is steady for a certain time.         |
 
 ---
 
-### Supported Units for Pressure Readings
+## Supported Units for Pressure Readings
 
 | Unit  | Description                   |
 |:------|:------------------------------|
@@ -87,9 +94,9 @@
 | AdvancedRead            | Read voltage, pressure, and unit conversions.|
 | SmoothedDiagnostics     | Averaged readings with fault detection.       |
 | CalibrationEEPROM       | Save/load custom calibration to EEPROM.      |
-| FullFeatureDemo         | Full showcase with smoothing and status.     |
+| FullFeatureDemo         | Full showcase with smoothing, alarms, and stability checking. |
 
 ---
 
-🛠 Built for real-world projects.  
-Now featuring **auto-zero**, **expanded unit support**, **pressure rate tracking**, and **peak pressure memory**! 🚀
+🛠 Built for serious real-world pressure monitoring.  
+Now featuring **auto-zero**, **expanded unit support**, **rate of change tracking**, **pressure alarms**, and **stability detection**! 🚀

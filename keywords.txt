@@ -1,5 +1,5 @@
 #######################################
-# MBS1250 Library Keywords v1.4.0
+# MBS1250 Library Keywords v1.5.0
 #######################################
 
 MBS1250                   KEYWORD1
@@ -37,11 +37,20 @@ getPressureMax            KEYWORD2
 getVoltageMin             KEYWORD2
 getVoltageMax             KEYWORD2
 
-# New v1.4.0 Features
+# v1.4.0 Features
 getPressureRate           KEYWORD2
 getPeakPressure           KEYWORD2
 getLowestPressure         KEYWORD2
 resetPeakHold             KEYWORD2
+
+# v1.5.0 Features
+setHighPressureAlarm      KEYWORD2
+setLowPressureAlarm       KEYWORD2
+clearPressureAlarms       KEYWORD2
+isHighPressureAlarmTriggered KEYWORD2
+isLowPressureAlarmTriggered  KEYWORD2
+onAlarmTriggered          KEYWORD2
+isPressureStable          KEYWORD2
 
 SensorStatus              LITERAL1
 SENSOR_OK                 LITERAL1
